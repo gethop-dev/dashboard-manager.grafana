@@ -37,7 +37,7 @@
 
 (defn- log-on-retry [logger max-retries]
   (fn [_ exception]
-    (log logger :report ::gf-request-retry {:reason (instance? exception)
+    (log logger :report ::gf-request-retry {:reason (class exception)
                                             :retries-remaining (- (inc max-retries) dh/*executions*)})))
 
 (defn- retry-policy [max-retries backoff-ms]
