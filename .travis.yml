@@ -1,0 +1,15 @@
+language: clojure
+lein: 2.8.3
+dist: xenial
+jdk:
+  - openjdk8
+script: lein do cljfmt check, eastwood, test :all
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: lein deploy
+  on:
+    tags: true
+cache:
+  directories:
+    - $HOME/.m2
