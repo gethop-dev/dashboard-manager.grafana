@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/magnetcoop/dashboard-manager.grafana.svg?branch=master)](https://travis-ci.org/magnetcoop/dashboard-manager.grafana)
+
 # dashboard-manager.grafana
 
 A [Duct](https://github.com/duct-framework/duct) library that provides an [Integrant](https://github.com/weavejester/integrant) key for managing dashboards and associated users and organizations in Grafana.

@@ -1,4 +1,4 @@
-(defproject dashboard-manager.grafana "0.1.0-SNAPSHOT"
+(defproject magnet/dashboard-manager.grafana "0.1.0-SNAPSHOT"
   :description "A Duct library for managing dashboards and associated users and organizations in Grafana"
   :url "https://github.com/magnetcoop/dashboard-manager.grafana"
   :min-lein-version "2.8.3"
@@ -10,6 +10,14 @@
                  [http-kit "2.3.0"]
                  [diehard "0.7.2"]
                  [org.clojure/data.json "0.2.6"]]
+  :deploy-repositories [["snapshots" {:url "https://clojars.org/repo"
+                                      :username :env/clojars_username
+                                      :password :env/clojars_password
+                                      :sign-releases false}]
+                        ["releases"  {:url "https://clojars.org/repo"
+                                      :username :env/clojars_username
+                                      :password :env/clojars_password
+                                      :sign-releases false}]]
   :profiles {:dev {:plugins [[jonase/eastwood "0.3.4"]
                              [lein-cljfmt "0.6.2"]]}
              :repl {:repl-options {:init-ns magnet.dashboard-manager.grafana
