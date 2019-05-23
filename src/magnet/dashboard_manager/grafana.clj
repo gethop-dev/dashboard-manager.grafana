@@ -6,7 +6,6 @@
   (:require
    [clojure.data.json :as json]
    [diehard.core :as dh]
-   [duct.logger :refer [log]]
    [magnet.dashboard-manager.core :as core]
    [integrant.core :as ig]
    [org.httpkit.client :as http]))
@@ -35,11 +34,6 @@
 (defn- fallback [value exception]
   {:status :connection-error})
 
-(defn- log-on-retry [logger max-retries]
-  (fn [_ exception]
-    (log logger :report ::gf-request-retry {:reason (class exception)
-                                            :retries-remaining (- (inc max-retries) dh/*executions*)})))
-
 (defn- retry-policy [max-retries backoff-ms]
   (dh/retry-policy-from-config
    {:max-retries max-retries
@@ -55,14 +49,13 @@
     (= code 404) :not-found
     :else :error))
 
-(defn do-request [{:keys [uri credentials logger timeout max-retries backoff-ms]} req-args]
+(defn do-request [{:keys [uri credentials timeout max-retries backoff-ms]} req-args]
   (let [req (assoc req-args
                    :url (str uri (:url req-args))
                    :basic-auth credentials
                    :timeout timeout)]
     (dh/with-retry {:policy (retry-policy max-retries backoff-ms)
-                    :fallback fallback
-                    :on-retry (log-on-retry logger max-retries)}
+                    :fallback fallback}
       (let [{:keys [status body error] :as resp} @(http/request req)]
         (when error
           (throw error))
@@ -191,7 +184,7 @@
     {:status (default-status-codes status)
      :orgs body}))
 
-(defrecord Grafana [uri credentials logger timeout max-retries backoff-ms]
+(defrecord Grafana [uri credentials timeout max-retries backoff-ms]
   core/IDMDashboard
   (get-ds-panels [this org-id ds-uid]
     (with-org this org-id gf-get-current-ds-panels ds-uid))
@@ -224,8 +217,8 @@
   (get-user-orgs [this user-id]
     (gf-get-user-orgs this user-id)))
 
-(defmethod ig/init-key :magnet.dashboard-manager/grafana [_ {:keys [uri credentials logger timeout max-retries backoff-ms]
+(defmethod ig/init-key :magnet.dashboard-manager/grafana [_ {:keys [uri credentials timeout max-retries backoff-ms]
                                                              :or {timeout default-timeout
                                                                   max-retries default-max-retries
                                                                   backoff-ms default-backoff-ms}}]
-  (->Grafana uri credentials logger timeout max-retries backoff-ms))
+  (->Grafana uri credentials timeout max-retries backoff-ms))
