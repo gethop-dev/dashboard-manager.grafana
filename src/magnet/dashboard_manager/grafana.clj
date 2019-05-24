@@ -178,10 +178,13 @@
     {:status (default-status-codes status)
      :user body}))
 
+;; NOTE: Grafana will always return 200 HTTP code even if the user doesn't exists.
 (defn gf-get-user-orgs [gf-record user-id]
   (let [{:keys [status body]} (do-request gf-record  {:method :get
                                                       :url (str "/api/users/" user-id "/orgs")})]
-    {:status (default-status-codes status)
+    {:status (if (and (= 200 status) (empty? body))
+               :not-found
+               (default-status-codes status))
      :orgs body}))
 
 (defrecord Grafana [uri credentials timeout max-retries backoff-ms]
