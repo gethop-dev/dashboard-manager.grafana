@@ -140,7 +140,7 @@
                                                       :body (json/write-str {:loginOrEmail login-name
                                                                              :role role})})]
     {:status (case status
-               400 :org-not-found
+               400 :role-not-found
                404 :user-not-found
                409 :already-exists
                (default-status-codes status))}))
