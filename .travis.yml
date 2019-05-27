@@ -1,8 +1,12 @@
 language: clojure
 lein: 2.8.3
 dist: xenial
+services:
+  - docker
 jdk:
   - openjdk8
+before_install:
+  - docker run --rm -d -p 3000:3000 grafana/grafana:${GRAFANA_TEST_VERSION}
 script: lein do cljfmt check, eastwood, test :all
 deploy:
   provider: script
