@@ -32,6 +32,14 @@
 (def ^:const default-backoff-ms
   [default-initial-delay default-max-delay 2.0])
 
+(def ^:const gateway-timeout
+  "504 Gateway timeout The server, while acting as a gateway or proxy,
+  did not receive a timely response from the upstream server specified
+  by the URI (e.g. HTTP, FTP, LDAP) or some other auxiliary
+  server (e.g. DNS) it needed to access in attempting to complete the
+  request."
+  504)
+
 (def ^:const bad-gateway
   "502 Bad gateway The server, while acting as a gateway or proxy,
   received an invalid response from the upstream server it accessed in
@@ -39,7 +47,14 @@
   502)
 
 (defn- fallback [value exception]
-  {:status :connection-error})
+  (let [status (condp instance? exception
+                 ;; Socket layer related exceptions
+                 java.net.UnknownHostException :unknown-host
+                 java.net.ConnectException :connection-refused
+                 ;; HTTP layer related exceptions
+                 org.httpkit.client.TimeoutException gateway-timeout
+                 org.httpkit.client.AbortException bad-gateway)]
+    {:status status}))
 
 (defn- log-on-retry [logger max-retries]
   (fn [_ exception]
