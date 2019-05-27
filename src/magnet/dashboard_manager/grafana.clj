@@ -32,6 +32,12 @@
 (def ^:const default-backoff-ms
   [default-initial-delay default-max-delay 2.0])
 
+(def ^:const bad-gateway
+  "502 Bad gateway The server, while acting as a gateway or proxy,
+  received an invalid response from the upstream server it accessed in
+  attempting to fulfill the request."
+  502)
+
 (defn- fallback [value exception]
   {:status :connection-error})
 
@@ -66,8 +72,11 @@
       (let [{:keys [status body error] :as resp} @(http/request req)]
         (when error
           (throw error))
-        {:status status
-         :body (json/read-str body :key-fn keyword :eof-error? false)}))))
+        (try
+          {:status status
+           :body (json/read-str body :key-fn keyword :eof-error? false)}
+          (catch Exception e
+            {:status bad-gateway}))))))
 
 (defn switch-org [gf-record org-id]
   (let [{:keys [status body]} (do-request gf-record {:url (str "/api/user/using/" org-id)
