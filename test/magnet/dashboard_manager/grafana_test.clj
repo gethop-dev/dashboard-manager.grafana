@@ -15,6 +15,18 @@
    :max-retries 5
    :backoff-ms [10 500]})
 
+(def ^:const test-datasource
+  {:name "Name"
+   :type "postgres"
+   :url "postgres:5432"
+   :access "proxy"
+   :password "pass"
+   :user "postgres"
+   :database "hydrogen"
+   :isDefault true
+   :jsonData {:postgresVersion 906
+              :sslmode "disable"}})
+
 (defn contains-org? [orgs org-name]
   (some #(= org-name (:name %)) orgs))
 
@@ -58,7 +70,7 @@
   (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
         org-name (str (UUID/randomUUID))]
     (testing "`update-org` test"
-      (let [org (dm-core/create-org gf-boundary (str (UUID/randomUUID))) ;; FIXME: passing plain UUID object will throw an exception. 
+      (let [org (dm-core/create-org gf-boundary (str (UUID/randomUUID))) ;; FIXME: passing plain UUID object will throw an exception.
             new-name (str (UUID/randomUUID))
             result (dm-core/update-org gf-boundary (:id org) new-name)
             orgs (:orgs (dm-core/get-orgs gf-boundary))]
@@ -177,3 +189,61 @@
     (testing "Get users of a non existing organization"
       (let [result (dm-core/get-org-users gf-boundary 9999)]
         (is (= :not-found (:status result)))))))
+
+(deftest ^:integration create-datasource-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        data (assoc test-datasource :name (str (UUID/randomUUID)))]
+    (testing "`create-datasource` test"
+      (let [result (dm-core/create-datasource gf-boundary 1 data)]
+        (is (number? (:id result)))
+        (is (= :ok (:status result)))))
+    (testing "Create an already existing datasource"
+      (dm-core/create-datasource gf-boundary 1 data)
+      (let [result (dm-core/create-datasource gf-boundary 1 data)]
+        (is (= :already-exists (:status result)))))))
+
+(deftest ^:integration get-datasource-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        name (str (UUID/randomUUID))
+        datasource (assoc test-datasource :name name)]
+    (testing "`get-datasource` test"
+      (let [id (:id (dm-core/create-datasource gf-boundary 1 datasource))
+            result (dm-core/get-datasource gf-boundary 1 id)]
+        (is (= :ok (:status result)))
+        (is (map? datasource))
+        (is (every? #(= (second %) ((first %) (:datasource result))) datasource))))))
+
+(deftest ^:integration get-datasources-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        name (str (UUID/randomUUID))
+        datasource (assoc test-datasource :name name)]
+    (testing "`get-datasources` test"
+      (dm-core/create-datasource gf-boundary 1 datasource)
+      (let [result (dm-core/get-datasources gf-boundary 1)
+            datasources (:datasources result)]
+        (is (= :ok (:status result)))
+        (is (vector? datasources))
+        (is (some #(= (:name %) name) datasources))))))
+
+(deftest ^:integration update-datasource-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        datasource (assoc test-datasource :name (str (UUID/randomUUID)))
+        datasource2 (assoc datasource :name (str (UUID/randomUUID)))]
+    (testing "`update-datasource` test"
+      (let [id (:id (dm-core/create-datasource gf-boundary 1 datasource))
+            result (dm-core/update-datasource gf-boundary 1 id datasource2)]
+        (is (= :ok (:status result)))
+        (is (= (-> result :datasource :name) (:name datasource2)))))))
+
+(deftest ^:integration delete-datasource-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        datasource (assoc test-datasource :name (str (UUID/randomUUID)))]
+    (testing "`delete-datasource` test"
+      (let [id (:id (dm-core/create-datasource gf-boundary 1 datasource))
+            result (dm-core/delete-datasource gf-boundary 1 id)
+            get-deleted (:status (dm-core/get-datasource gf-boundary 1 id))]
+        (is (= :ok (:status result)))
+        (is (= :not-found get-deleted))))
+    (testing "delete non existing datasource"
+      (let [result (dm-core/delete-datasource gf-boundary 1 (rand-int 1000))]
+        (is (= :error (:status result)))))))

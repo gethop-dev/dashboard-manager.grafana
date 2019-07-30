@@ -133,6 +133,7 @@
     {:status (default-status-codes status)
      :orgs body}))
 
+
 (defn gf-create-org [gf-record org-name]
   (let [{:keys [status body]} (do-request gf-record  {:method :post
                                                       :url "/api/orgs"
@@ -213,6 +214,41 @@
                (default-status-codes status))
      :orgs body}))
 
+(defn gf-create-datasource [gf-record data]
+  (let [{:keys [status body]} (do-request gf-record {:method :post
+                                                     :url (str "/api/datasources")
+                                                     :headers {"Content-Type" "application/json"}
+                                                     :body (json/write-str data)})]
+    {:status (case status
+               409 :already-exists
+               (default-status-codes status))
+     :id (:id body)}))
+
+(defn gf-delete-datasource [gf-record id]
+  (let [{:keys [status body]} (do-request gf-record {:method :delete
+                                                     :url (str "/api/datasources/" id)})]
+    {:status (default-status-codes status)}))
+
+(defn gf-update-datasource [gf-record id changes]
+  (let [{:keys [status body]} (do-request gf-record {:method :put
+                                                     :url (str "/api/datasources/" id)
+                                                     :headers {"Content-Type" "application/json"}
+                                                     :body (json/write-str changes)})]
+    {:status (default-status-codes status)
+     :datasource (:datasource body)}))
+
+(defn gf-get-datasource [gf-record id]
+  (let [{:keys [status body]} (do-request gf-record {:method :get
+                                                     :url (str "/api/datasources/" id)})]
+    {:status (default-status-codes status)
+     :datasource body}))
+
+(defn gf-get-datasources [gf-record]
+  (let [{:keys [status body]} (do-request gf-record {:method :get
+                                                     :url (str "/api/datasources/")})]
+    {:status (default-status-codes status)
+     :datasources body}))
+
 (defrecord Grafana [uri credentials timeout max-retries backoff-ms]
   core/IDMDashboard
   (get-ds-panels [this org-id ds-uid]
@@ -244,7 +280,19 @@
   (get-user [this login-name]
     (gf-get-user this login-name))
   (get-user-orgs [this user-id]
-    (gf-get-user-orgs this user-id)))
+    (gf-get-user-orgs this user-id))
+
+  core/IDMDatasource
+  (create-datasource [this org-id data]
+    (with-org this org-id gf-create-datasource data))
+  (delete-datasource [this org-id id]
+    (with-org this org-id gf-delete-datasource id))
+  (update-datasource [this org-id id changes]
+    (with-org this org-id gf-update-datasource id changes))
+  (get-datasource [this org-id id]
+    (with-org this org-id gf-get-datasource id))
+  (get-datasources [this org-id]
+    (with-org this org-id gf-get-datasources)))
 
 (defmethod ig/init-key :magnet.dashboard-manager/grafana [_ {:keys [uri credentials timeout max-retries backoff-ms]
                                                              :or {timeout default-timeout

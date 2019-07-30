@@ -54,7 +54,7 @@ Basic configuration:
 ```edn
   :magnet.dashboard-manager/grafana
    {:uri  #duct/env ["GRAFANA_URI" Str :or "http://localhost:3000"]
-    :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"] 
+    :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"]
                   #duct/env ["GRAFANA_TEST_PASSWORD" Str :or "admin"]]}
 ```
 
@@ -62,7 +62,7 @@ Configuration with custom request retry policy:
 ```edn
   :magnet.dashboard-manager/grafana
    {:uri #duct/env ["GRAFANA_URI" Str :or "http://localhost:3000"]
-    :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"] 
+    :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"]
                   #duct/env ["GRAFANA_TEST_PASSWORD" Str :or "admin"]]
     :timeout 300
     :max-retries 5
@@ -86,7 +86,7 @@ Next we create the configuration var holding the Grafana integration configurati
 
 ```clj
 user> (def config {:uri #duct/env ["GRAFANA_URI" Str :or "http://localhost:3000"]
-                   :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"] 
+                   :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"]
                                  #duct/env ["GRAFANA_PASSWORD" Str :or "admin"]]})
 #'user/config
 user>
@@ -120,7 +120,7 @@ Now that we have our `Grafana` record, we are ready to use the methods defined b
 
 ### Managing organizations
 #### `create-org`
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization name
 * returning value:
@@ -132,11 +132,11 @@ user> (core/create-org gf-record "foo")
 {:status :ok :orgId 2}
 ```
 #### `get-orgs`
-* parameters: 
+* parameters:
   - A `Grafana` record
 * returning value:
   - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
-  - `:orgs`: A vector of maps. Each map representing an existing organization. 
+  - `:orgs`: A vector of maps. Each map representing an existing organization.
 * Example:
 ```clj
 user> (core/get-orgs gf-record)
@@ -144,7 +144,7 @@ user> (core/get-orgs gf-record)
                     {:id 2 :name "foo"}]}
 ```
 #### `update-org`
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
   - Organization's new name
@@ -156,7 +156,7 @@ user> (core/update-org gf-record 2 "foo-bar")
 {:status :ok}
 ```
 #### `delete-org`
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
 * returning value:
@@ -168,7 +168,7 @@ user> (core/delete-org gf-record 2)
 ```
 #### `add-org-user`
 * description: Adds a user to an organization with a specific role.
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
   - User's login name (username or email)
@@ -182,7 +182,7 @@ user> (core/add-org-user gf-record 1 "foo-bar" "Editor")
 ```
 #### `get-org-users`
 * description: Gets the user list for the given organization.
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
 * returning value:
@@ -196,7 +196,7 @@ user> (core/get-org-users gf-record 1)
 ```
 ### Managing users
 #### `create-user`
-* parameters: 
+* parameters:
   - A `Grafana` record
   - User data: a map with the user specific data
     - `:name` (OPTIONAL)
@@ -212,11 +212,11 @@ user> (core/create-user gf-record {:login "login" :password "password"})
 {:status :ok :id 3}
 ```
 #### `update-user`
-* parameters: 
+* parameters:
   - A `Grafana` record
   - User ID
   - User data: a map with the data we want to change, plus the login field
-    - `:name` 
+    - `:name`
     - `:email` (REQUIRED if login is not specified)
     - `:login` (REQUIRED if email is not specified)
 * returning value:
@@ -228,7 +228,7 @@ user> (core/update-user gf-record 3 {:name "fooo" :login "login"})
 {:status :ok}
 ```
 #### `get-user`
-* parameters: 
+* parameters:
   - A `Grafana` record
   - User's login or email
 * returning value:
@@ -241,7 +241,7 @@ user> (core/get-user gf-record "login")
 ```
 #### `get-user-orgs`
 * description: Gets a list of organizations to which a user belongs.
-* parameters: 
+* parameters:
   - A `Grafana` record
   - User ID
 * returning value:
@@ -255,7 +255,7 @@ user> (core/get-user-orgs gf-record 1)
 ### Managing dashboards
 #### `get-org-dashboards`
 * description: Gets a list of dashboards for the given organization.
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
 * returning value:
@@ -269,7 +269,7 @@ user> (core/get-org-dashboards gf-record 1)
 ```
 #### `get-org-panels`
 * description: Gets a list of panels for the given organization.
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
 * returning value:
@@ -283,7 +283,7 @@ ample-dashboard"})}
 ```
 #### `get-ds-panels`
 * description: Gets a list of panels for the given dashboard.
-* parameters: 
+* parameters:
   - A `Grafana` record
   - Organization ID
   - Dashboard ID
@@ -295,6 +295,114 @@ ample-dashboard"})}
 user> (core/get-org-panels gf-record 1)
 {:status :ok, :panels ({:id 2, :title "Panel Title", :ds-url "/d/yYtEB6WZz/example-dashboard"} {:id 4, :title "Panel Title", :ds-url "/d/yYtEB6WZz/ex\
 ample-dashboard"})}
+```
+### Managing datasources
+#### `create-datasource`
+* parameters:
+  - A `Grafana` record
+  - Organization id
+  - Datasource data: a map with the datasource data, the structure depends on the datasource type. `:name`,`:type`, and `:access` key are mandatory, see the example, and Grafana's [API documentation](https://grafana.com/docs/http_api/data_source/#create-a-data-source) for more information.
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`, `:already-exists`
+  - `:id`: ID assigned to the created datasource
+* Example:
+```clj
+user> (core/create-datasource gf-record 1 {:name "Name"
+                                           :type "postgres"
+                                           :url "postgres:5432"
+                                           :access "proxy"
+                                           :password "pass"
+                                           :user "postgres"
+                                           :database "hydrogen"
+                                           :isDefault true
+                                           :jsonData {:postgresVersion 906 :sslmode "disable"}})
+{:status :ok :id 2}
+```
+#### `get-datasource`
+* parameters:
+  - A `Grafana` record
+  - Organization id
+  - Datasource id
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
+  - `:datasource`: A map with the datasource data.
+* Example:
+```clj
+user> (core/get-datasource gf-record 1 2)
+{:status :ok :datasource {:isDefault false,
+                           :orgId 1,
+                           :password "pass",
+                           :name "b9db0015-e45f-4a81-80ef-c3b5225cbe39",
+                           :secureJsonFields {},
+                           :type "postgres",
+                           :basicAuthUser "",
+                           :typeLogoUrl "",
+                           :readOnly false,
+                           :basicAuthPassword "",
+                           :id 2,
+                           :basicAuth false,
+                           :url "postgres:5432",
+                           :database "hydrogen",
+                           :access "proxy",
+                           :jsonData {:postgresVersion 906, :sslmode "disable"},
+                                      :version 1,
+                                      :user "postgres",
+                                      :withCredentials false}}
+```
+#### `get-datasources`
+* parameters:
+  - A `Grafana` record
+  - Organiztion id
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
+  - `:datasources`: A vector of maps. Each map representing an existing datasource.
+* Example:
+```clj
+user> (core/get-datasources gf-record 1)
+{:status :ok :datasources [{:isDefault false,
+                            :orgId 1,
+                            :password "pass",
+                            :name "00f70239-be39-4199-939c-d90fa625b41f",
+                            :type "postgres",
+                            :typeLogoUrl
+                            "public/app/plugins/datasource/postgres/img/postgresql_logo.svg",
+                            :readOnly false,
+                            :id 32,
+                            :basicAuth false,
+                            :url "postgres:5432",
+                            :database "hydrogen",
+                            :access "proxy",
+                            :jsonData {:postgresVersion 906, :sslmode "disable"},
+                            :user "postgres"}
+                           {:name "datasource2"
+                            ...}]
+```
+#### `update-datasource`
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - Datasource ID
+  - A map with the changes. `:name`,`:type`, and `:access` key are mandatory, see the example, and Grafana's [API documentation](https://grafana.com/docs/http_api/data_source/#update-an-existing-data-source) for more information.
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:unknown-host`, `:connection-refused`, `:error`
+  - A map representing the new state of the datasource.
+* Example:
+```clj
+user> (core/update-datasource gf-record 1 2 {:name "new-name"})
+{:status :ok
+ :datasource {:name "new-name" ...}}
+```
+#### `delete-datasource`
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - Datasource ID
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `not-found`, `:unknown-host`, `:connection-refused`, `:error`
+* Example:
+```clj
+user> (core/delete-datasource gf-record 1 2)
+{:status :ok}
 ```
 ## License
 

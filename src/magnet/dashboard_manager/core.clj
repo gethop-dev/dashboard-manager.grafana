@@ -23,3 +23,9 @@
   (get-user [this login-name])
   (get-user-orgs [this user-id]))
 
+(defprotocol IDMDatasource
+  (create-datasource [this org-id data])
+  (delete-datasource [this org-id id])
+  (update-datasource [this org-id id changes])
+  (get-datasource [this org-id id])
+  (get-datasources [this org-id]))

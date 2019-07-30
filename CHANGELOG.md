@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [0.2.0] - 2019-07-30
+
+### Added
+- Add new methods to manage datasources
+
 ## [0.1.1] - 2019-05-27
 
 ### Added
@@ -16,5 +21,5 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fix [#5 Wrong status code when setting an invalid role to a user](https://github.com/magnetcoop/dashboard-manager.grafana/issues/5)
 - Fix [#6 Get-org-users returns status :ok even if the org doesn't exist](https://github.com/magnetcoop/dashboard-manager.grafana/issues/6)
 - Remove logger.
- 
+
 [0.1.1]: https://github.com/magnetcoop/dashboard-manager.grafana/releases/tag/0.1.1
