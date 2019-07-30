@@ -133,7 +133,6 @@
     {:status (default-status-codes status)
      :orgs body}))
 
-
 (defn gf-create-org [gf-record org-name]
   (let [{:keys [status body]} (do-request gf-record  {:method :post
                                                       :url "/api/orgs"
