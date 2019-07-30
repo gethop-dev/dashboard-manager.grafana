@@ -24,7 +24,13 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
     * [get-org-dashboards](#get-org-dashboards)
     * [get-org-panels](#get-org-panels)
     * [get-ds-panels](#get-ds-panels)
-
+  * [Managing datasources](#managing-datasources)
+    * [create-datasource](#create-datasource)
+    * [get-datasource](#get-datasource)
+    * [get-datasources](#get-datasources)
+    * [update-datasource](#update-datasource)
+    * [delete-datasource](#delete-datasource)
+    
 ## Installation
 
 [![Clojars Project](https://clojars.org/magnet/dashboard-manager.grafana/latest-version.svg)](https://clojars.org/magnet/dashboard-manager.grafana)
