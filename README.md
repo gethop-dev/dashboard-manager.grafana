@@ -131,11 +131,11 @@ Now that we have our `Grafana` record, we are ready to use the methods defined b
   - Organization name
 * returning value:
   - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`, `:already-exists`
-  - `:orgId`: ID assigned to the created organization
+  - `:id`: ID assigned to the created organization
 * Example:
 ```clj
 user> (core/create-org gf-record "foo")
-{:status :ok :orgId 2}
+{:status :ok :id 2}
 ```
 #### `get-orgs`
 * parameters:
