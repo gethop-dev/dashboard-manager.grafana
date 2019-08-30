@@ -21,7 +21,8 @@
   (create-user [this user-data])
   (update-user [this id changes])
   (get-user [this login-name])
-  (get-user-orgs [this user-id]))
+  (get-user-orgs [this user-id])
+  (delete-user [this user-id]))
 
 (defprotocol IDMDatasource
   (create-datasource [this org-id data])

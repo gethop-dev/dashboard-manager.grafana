@@ -148,6 +148,15 @@
       (let [result (dm-core/get-user-orgs gf-boundary 1243434143)]
         (is (= :not-found (:status result)))))))
 
+(deftest ^:integration delete-user
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+    (testing "`delete-user` test"
+      (let [user-data (random-user-data)
+            user-id (:id (dm-core/create-user gf-boundary user-data))
+            result (dm-core/delete-user gf-boundary user-id)]
+        (is (= :ok (:status result)))
+        (is (= :not-found (:status (dm-core/get-user gf-boundary (:login user-data)))))))))
+
 (deftest ^:integration add-org-user-test
   (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
     (testing "`add-org-user` test"
