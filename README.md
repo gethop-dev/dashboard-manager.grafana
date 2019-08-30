@@ -20,6 +20,7 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
     * [update-user](#update-user)
     * [get-user](#get-user)
     * [get-user-orgs](#get-user-orgs)
+    * [delete-user](#delete-user)
   * [Managing dashboards](#managing-dashboards)
     * [get-org-dashboards](#get-org-dashboards)
     * [get-org-panels](#get-org-panels)
@@ -30,7 +31,7 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
     * [get-datasources](#get-datasources)
     * [update-datasource](#update-datasource)
     * [delete-datasource](#delete-datasource)
-    
+
 ## Installation
 
 [![Clojars Project](https://clojars.org/magnet/dashboard-manager.grafana/latest-version.svg)](https://clojars.org/magnet/dashboard-manager.grafana)
@@ -258,6 +259,18 @@ user> (core/get-user gf-record "login")
 user> (core/get-user-orgs gf-record 1)
 {:status :ok :orgs [{:orgId 1, :name "Main Org.", :role "Admin"}]}
 ```
+### `delete-user`
+* parameters:
+  - A `Grafana` record
+  - User's ID
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:unknown-host`, `:connection-refused`, `:error`
+* Example:
+``` clj
+user> (core/delete-user gf-record 2)
+{:status :ok}
+```
+
 ### Managing dashboards
 #### `get-org-dashboards`
 * description: Gets a list of dashboards for the given organization.
