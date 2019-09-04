@@ -199,6 +199,20 @@
       (let [result (dm-core/get-org-users gf-boundary 9999)]
         (is (= :not-found (:status result)))))))
 
+(deftest ^:integration delete-org-user
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+    (testing "`delete-org-user` test"
+      (let [org-id (:id (dm-core/create-org gf-boundary (str (UUID/randomUUID))))
+            user-data (random-user-data)
+            _ (dm-core/create-user gf-boundary user-data)
+            _ (dm-core/add-org-user gf-boundary org-id (:login user-data) "Viewer")
+            user-id (-> (dm-core/get-user gf-boundary (:login user-data)) :user :id)
+            result (dm-core/delete-org-user gf-boundary org-id user-id)]
+        (is (= :ok (:status result)))))
+    (testing "deleting an org user that doesn't exists"
+      (let [result (dm-core/delete-org-user gf-boundary 1 23354)]
+        (is (= :error (:status result)))))))
+
 (deftest ^:integration create-datasource-test
   (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
         data (assoc test-datasource :name (str (UUID/randomUUID)))]

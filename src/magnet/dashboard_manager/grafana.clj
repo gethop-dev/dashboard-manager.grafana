@@ -177,6 +177,11 @@
                (default-status-codes status))
      :users body}))
 
+(defn gf-delete-org-user [gf-record org-id user-id]
+  (let [{:keys [status]} (do-request gf-record {:method :delete
+                                                :url (str "/api/orgs/" org-id "/users/" user-id)})]
+    {:status (default-status-codes status)}))
+
 (defn gf-create-user [gf-record user-data]
   (let [{:keys [status body]} (do-request gf-record  {:method :post
                                                       :url "/api/admin/users/"
@@ -275,6 +280,8 @@
     (gf-add-org-user this org-id login-name role))
   (get-org-users [this org-id]
     (gf-get-org-users this org-id))
+  (delete-org-user [this org-id user-id]
+    (gf-delete-org-user this org-id user-id))
 
   core/IDMUser
   (create-user [this user-data]

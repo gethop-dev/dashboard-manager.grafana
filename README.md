@@ -15,6 +15,7 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
     * [delete-org](#delete-org)
     * [add-org-user](#add-org-user)
     * [get-org-users](#get-org-users)
+    * [delete-org-user](#delete-org-user)
   * [Managing users](#managing-users)
     * [create-user](#create-user)
     * [update-user](#update-user)
@@ -201,6 +202,22 @@ user> (core/get-org-users gf-record 1)
 {:status :ok :users [{:orgId 1, :userId 1, :email "admin@localhost", :avatarUrl "/avatar/46d229b033af06a191ff2267bca9ae56", :login "admin", :role "Admin", :lastSeenAt "2019-05-27T14:21:51Z", :lastSeenAtAge "< 1m"}
                      {:orgId 1, :userId 2, :email "foo-bar@email.com", :avatarUrl "/avatar/46d234t033af06a191ff2267bca9ae56", :login "foo-bar", :role "Editor", :lastSeenAt "2019-05-27T14:21:51Z", :lastSeenAtAge "< 1m"}]}
 ```
+
+#### `delete-org-user`
+* description: Deletes an user from a given organization.
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - An user ID
+* returning value:
+  - `:status`: `:ok`,`:access-denied`, `:error`
+* Example:
+
+``` clj
+user> (core/delete-org-user gf-record 1 2)
+{:status :ok}
+```
+
 ### Managing users
 #### `create-user`
 * parameters:
