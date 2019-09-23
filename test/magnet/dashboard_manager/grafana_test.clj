@@ -39,9 +39,43 @@
    :login (str (UUID/randomUUID))
    :password "password"})
 
+(def ^:const default-org-id
+  1)
+
+(def ^:const provisioned-dashboard-uid
+  "9h9Z01jiz")
+
+(def ^:const provisioned-test-panels
+  "Automatically provisioned panels, from test data"
+  [{:id 4, :title "Heatmap", :ds-url "/d/9h9Z01jiz/tests-dashboard"}
+   {:id 2, :title "Timeseries", :ds-url "/d/9h9Z01jiz/tests-dashboard"}
+   {:id 6, :title "Singlestat", :ds-url "/d/9h9Z01jiz/tests-dashboard"}])
+
+(def ^:const provisioned-test-dashboards
+  "Automatically provisioned dashboards, from test data"
+  [{:uid "9h9Z01jiz"
+    :title "Tests Dashboard"
+    :url "/d/9h9Z01jiz/tests-dashboard"
+    :panels provisioned-test-panels}])
+
 (deftest protocol-test
   (is (instance? Grafana
                  (ig/init-key :magnet.dashboard-manager/grafana test-config))))
+
+(deftest ^:integration IDMDashboard
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+    (testing "`get-ds-panels` test"
+      (let [result (dm-core/get-ds-panels gf-boundary default-org-id provisioned-dashboard-uid)]
+        (is (= {:status :ok, :panels provisioned-test-panels}
+               result))))
+    (testing "`get-org-panels` test"
+      (let [result (dm-core/get-org-panels gf-boundary default-org-id)]
+        (is (= {:status :ok, :panels provisioned-test-panels}
+               result))))
+    (testing "`get-org-dashboards` test"
+      (let [result (dm-core/get-org-dashboards gf-boundary default-org-id)]
+        (is (= {:status :ok, :dashboards provisioned-test-dashboards}
+               result))))))
 
 (deftest ^:integration create-org-test
   (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
