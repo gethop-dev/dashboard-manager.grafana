@@ -122,10 +122,11 @@
                       (map #(assoc % :panels (:panels (gf-get-current-ds-panels gf-record (:uid %))))))}))
 
 (defn with-org [gf-record org-id f & args]
-  (let [{:keys [status]} (switch-org gf-record org-id)]
-    (if (= :ok status)
-      (apply f gf-record args)
-      {:status status})))
+  (locking gf-record
+    (let [{:keys [status]} (switch-org gf-record org-id)]
+      (if (= :ok status)
+        (apply f gf-record args)
+        {:status status}))))
 
 (defn gf-get-orgs [gf-record]
   (let [{:keys [status body]} (do-request gf-record  {:method :get
