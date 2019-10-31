@@ -18,9 +18,10 @@
                                       :username :env/clojars_username
                                       :password :env/clojars_password
                                       :sign-releases false}]]
-  :profiles {:dev {:plugins [[jonase/eastwood "0.3.4"]
-                             [lein-cljfmt "0.6.2"]]}
+  :profiles {:dev [:project/dev :profiles/dev]
+             :profiles/dev {}
+             :project/dev {:plugins [[jonase/eastwood "0.3.4"]
+                                     [lein-cljfmt "0.6.2"]]}
              :repl {:repl-options {:init-ns magnet.dashboard-manager.grafana
                                    :host "0.0.0.0"
-                                   :port 4001}
-                    :plugins [[cider/cider-nrepl "0.21.0"]]}})
+                                   :port 4001}}})
