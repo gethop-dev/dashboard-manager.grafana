@@ -47,9 +47,9 @@
 
 (def ^:const provisioned-test-panels
   "Automatically provisioned panels, from test data"
-  [{:id 4, :title "Heatmap", :ds-url "/d/9h9Z01jiz/tests-dashboard"}
-   {:id 2, :title "Timeseries", :ds-url "/d/9h9Z01jiz/tests-dashboard"}
-   {:id 6, :title "Singlestat", :ds-url "/d/9h9Z01jiz/tests-dashboard"}])
+  [{:id 4, :title "Heatmap" :ds-url "/d/9h9Z01jiz/tests-dashboard" :ds-id "9h9Z01jiz"}
+   {:id 2, :title "Timeseries" :ds-url "/d/9h9Z01jiz/tests-dashboard" :ds-id "9h9Z01jiz"}
+   {:id 6, :title "Singlestat" :ds-url "/d/9h9Z01jiz/tests-dashboard" :ds-id "9h9Z01jiz"}])
 
 (def ^:const provisioned-test-dashboards
   "Automatically provisioned dashboards, from test data"

@@ -314,8 +314,8 @@ user> (core/get-org-dashboards gf-record 1)
 * Example:
 ```clj
 user> (core/get-org-panels gf-record 1)
-{:status :ok, :panels ({:id 2, :title "Panel Title", :ds-url "/d/yYtEB6WZz/example-dashboard"} {:id 4, :title "Panel Title", :ds-url "/d/yYtEB6WZz/ex\
-ample-dashboard"})}
+{:status :ok, :panels ({:id 2, :title "Panel Title", :ds-url "/d/yYtEB6WZz/example-dashboard", :ds-id "yYtEB6WZz"} {:id 4, :title "Panel Title", :ds-url "/d/yYtEB6WZz/ex\
+ample-dashboard", :ds-id "yYtEB6WZz"})}
 ```
 #### `get-ds-panels`
 * description: Gets a list of panels for the given dashboard.
@@ -329,8 +329,8 @@ ample-dashboard"})}
 * Example:
 ```clj
 user> (core/get-org-panels gf-record 1)
-{:status :ok, :panels ({:id 2, :title "Panel Title", :ds-url "/d/yYtEB6WZz/example-dashboard"} {:id 4, :title "Panel Title", :ds-url "/d/yYtEB6WZz/ex\
-ample-dashboard"})}
+{:status :ok, :panels ({:id 2, :title "Panel Title", :ds-url "/d/yYtEB6WZz/example-dashboard", :ds-id "yYtEB6WZz"} {:id 4, :title "Panel Title", :ds-url "/d/yYtEB6WZz/ex\
+ample-dashboard", :ds-id "yYtEB6WZz"})}
 ```
 ### Managing datasources
 #### `create-datasource`

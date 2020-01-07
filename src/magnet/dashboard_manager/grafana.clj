@@ -101,7 +101,8 @@
     {:status (default-status-codes status)
      :panels (map #(-> %
                        (select-keys [:id :title])
-                       (assoc :ds-url ds-url))
+                       (assoc :ds-url ds-url
+                              :ds-id dashboard-uid))
                   panels)}))
 
 (defn gf-get-current-org-panels [gf-record]
