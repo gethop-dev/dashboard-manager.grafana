@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.5] - 2020-01-07
+### Changed
+- Add dashboard uid to returning panels map
+- Split user and project profiles in `config.edn`
+
 ## [0.2.4] - 2019-09-23
 ### Added
 - Unit tests for core/IDMDashboard protocol implementation
