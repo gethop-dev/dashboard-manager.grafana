@@ -12,7 +12,7 @@ jobs:
     - name: "Latest Grafana"
       env: GRAFANA_TEST_VERSION=${GRAFANA_TEST_VERSION_LATEST}
 before_install:
-  - docker run --rm -d -p ${GRAFANA_TEST_PORT}:3000 -v "$(pwd)/grafana/datasources":/etc/grafana/provisioning/datasources -v "$(pwd)/grafana/dashboards":/etc/grafana/provisioning/dashboards grafana/grafana:${GRAFANA_TEST_VERSION}
+  - docker run --rm -d -p 3000:3000 -v "$(pwd)/grafana/datasources":/etc/grafana/provisioning/datasources -v "$(pwd)/grafana/dashboards":/etc/grafana/provisioning/dashboards grafana/grafana:${GRAFANA_TEST_VERSION}
 script: lein do cljfmt check, eastwood, test :all
 deploy:
   provider: script
