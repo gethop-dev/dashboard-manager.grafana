@@ -4,11 +4,13 @@ dist: xenial
 services:
   - docker
 jdk:
-  - openjdk8    
-env:
-  matrix:
-    - GRAFANA_TEST_VERSION=6.2.5 GRAFANA_TEST_URI=http://localhost:3000 GRAFANA_TEST_PORT=3000
-    - GRAFANA_TEST_VERSION=6.6.0 GRAFANA_TEST_URI=http://localhost:3001 GRAFANA_TEST_PORT=3001
+  - openjdk8
+jobs:
+  include:
+    - name: "Legacy Grafana"
+      env: GRAFANA_TEST_VERSION=${GRAFANA_TEST_VERSION_LEGACY}
+    - name: "Latest Grafana"
+      env: GRAFANA_TEST_VERSION=${GRAFANA_TEST_VERSION_LATEST}
 before_install:
   - docker run --rm -d -p ${GRAFANA_TEST_PORT}:3000 -v "$(pwd)/grafana/datasources":/etc/grafana/provisioning/datasources -v "$(pwd)/grafana/dashboards":/etc/grafana/provisioning/dashboards grafana/grafana:${GRAFANA_TEST_VERSION}
 script: lein do cljfmt check, eastwood, test :all
