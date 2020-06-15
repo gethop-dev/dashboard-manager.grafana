@@ -304,3 +304,12 @@
     (testing "delete non existing datasource"
       (let [result (dm-core/delete-datasource gf-boundary 1 (rand-int 1000))]
         (is (= :error (:status result)))))))
+
+(deftest ^:integration regular-login-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana (assoc test-config :auth-method :regular-login))]
+    (testing "regular login should yield the session cookie"
+      (is (str/starts-with? (:session-cookie gf-boundary) dm-grafana/grafana-session-cookie)))
+    (testing "logged in user should be able to get orgs that he belongs to"
+      (let [{:keys [status orgs]} (dm-grafana/gf-get-current-user-orgs gf-boundary)]
+        (is (= :ok status))
+        (is (pos? (count orgs)))))))
