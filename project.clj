@@ -18,6 +18,7 @@
                                       :username :env/clojars_username
                                       :password :env/clojars_password
                                       :sign-releases false}]]
+  :aliases {"lint-and-test" ["do" ["cljfmt" "check"] "eastwood" ["test" ":all"]]}
   :profiles {:dev [:project/dev :profiles/dev]
              :profiles/dev {}
              :project/dev {:plugins [[jonase/eastwood "0.3.11"]

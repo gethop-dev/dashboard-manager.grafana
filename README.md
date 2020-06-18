@@ -467,6 +467,12 @@ user> (core/update-datasource gf-record 1 2 {:name "new-name"})
 user> (core/delete-datasource gf-record 1 2)
 {:status :ok}
 ```
+
+## Running Tests Locally
+```bash
+./run-tests.sh
+```
+
 ## License
 
 Copyright (c) 2019, 2020 Magnet S Coop.
