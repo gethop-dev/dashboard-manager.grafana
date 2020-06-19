@@ -8,7 +8,8 @@
    [diehard.core :as dh]
    [magnet.dashboard-manager.core :as core]
    [integrant.core :as ig]
-   [org.httpkit.client :as http]))
+   [org.httpkit.client :as http]
+   [clojure.string :as str]))
 
 (def ^:const default-timeout
   "Default timeout value for an connection attempt with grafana."
@@ -28,6 +29,10 @@
   the ceiling for the retry delay."
   1000)
 
+(def ^:const default-auth-method
+  "Default authentication method"
+  :basic-auth)
+
 (def ^:const default-backoff-ms
   [default-initial-delay default-max-delay 2.0])
 
@@ -44,6 +49,10 @@
   received an invalid response from the upstream server it accessed in
   attempting to fulfill the request."
   502)
+
+(def ^:const grafana-session-cookie
+  "cookie name returned by Grafana's /login end point"
+  "grafana_session")
 
 (defn- fallback [value exception]
   (let [status (condp instance? exception
@@ -70,18 +79,28 @@
     (= code 404) :not-found
     :else :error))
 
-(defn do-request [{:keys [uri credentials timeout max-retries backoff-ms]} req-args]
-  (let [req (assoc req-args
-                   :url (str uri (:url req-args))
-                   :basic-auth credentials
-                   :timeout timeout)]
+(defn append-cookie [req session-cookie]
+  (update-in req [:headers "Cookie"]
+             #(if %
+                (str % ";" session-cookie)
+                session-cookie)))
+
+(defn do-request [{:keys [uri credentials timeout max-retries backoff-ms auth-method session-cookie]} req-args]
+  (let [req (cond-> (assoc req-args
+                           :url (str uri (:url req-args))
+                           :timeout timeout)
+              (= auth-method :basic-auth)
+              (assoc :basic-auth credentials)
+              session-cookie
+              (append-cookie session-cookie))]
     (dh/with-retry {:policy (retry-policy max-retries backoff-ms)
                     :fallback fallback}
-      (let [{:keys [status body error] :as resp} @(http/request req)]
+      (let [{:keys [status body error headers] :as resp} @(http/request req)]
         (when error
           (throw error))
         (try
           {:status status
+           :headers headers
            :body (json/read-str body :key-fn keyword :eof-error? false)}
           (catch Exception e
             {:status bad-gateway}))))))
@@ -121,6 +140,12 @@
      :dashboards (->> body
                       (map #(select-keys % [:uid :title :url]))
                       (map #(assoc % :panels (:panels (gf-get-current-ds-panels gf-record (:uid %))))))}))
+
+(defn gf-get-current-user-orgs [gf-record]
+  (let [{:keys [status body]} (do-request gf-record  {:method :get
+                                                      :url "/api/user/orgs"})]
+    {:status (default-status-codes status)
+     :orgs body}))
 
 (defn with-org [gf-record org-id f & args]
   (locking gf-record
@@ -226,10 +251,10 @@
     {:status (default-status-codes status)}))
 
 (defn gf-create-datasource [gf-record data]
-  (let [{:keys [status body]} (do-request gf-record {:method :post
-                                                     :url (str "/api/datasources")
+  (let [{:keys [status body]} (do-request gf-record {:method  :post
+                                                     :url     "/api/datasources"
                                                      :headers {"Content-Type" "application/json"}
-                                                     :body (json/write-str data)})]
+                                                     :body    (json/write-str data)})]
     {:status (case status
                409 :already-exists
                (default-status-codes status))
@@ -256,11 +281,11 @@
 
 (defn gf-get-datasources [gf-record]
   (let [{:keys [status body]} (do-request gf-record {:method :get
-                                                     :url (str "/api/datasources/")})]
+                                                     :url    "/api/datasources/"})]
     {:status (default-status-codes status)
      :datasources body}))
 
-(defrecord Grafana [uri credentials timeout max-retries backoff-ms]
+(defrecord Grafana [uri credentials timeout max-retries backoff-ms auth-method]
   core/IDMDashboard
   (get-ds-panels [this org-id ds-uid]
     (with-org this org-id gf-get-current-ds-panels ds-uid))
@@ -309,8 +334,34 @@
   (get-datasources [this org-id]
     (with-org this org-id gf-get-datasources)))
 
-(defmethod ig/init-key :magnet.dashboard-manager/grafana [_ {:keys [uri credentials timeout max-retries backoff-ms]
-                                                             :or {timeout default-timeout
-                                                                  max-retries default-max-retries
-                                                                  backoff-ms default-backoff-ms}}]
-  (->Grafana uri credentials timeout max-retries backoff-ms))
+(defn do-user-login
+  "Logs in with the configured creds and returns a session-cookie to be used in subsequent requests"
+  [{:keys [credentials] :as gf-record}]
+  (let [[user password] credentials
+        {:keys [status headers] :as resp} (do-request gf-record
+                                                      {:method  :post
+                                                       :url     "/login"
+                                                       :headers {"Content-Type" "application/json"}
+                                                       :body    (json/write-str {:user     user
+                                                                                 :password password})})]
+    (if (= status 200)
+      (->> (str/split (:set-cookie headers) #";")
+           (filter #(str/starts-with? % grafana-session-cookie)) first)
+      (throw (ex-info (str "Error during login due to status " status) resp)))))
+
+(defn ^:private log-in [{:keys [auth-method] :as gf}]
+  (case auth-method
+    :regular-login (map->Grafana (assoc gf :session-cookie (do-user-login gf)))
+    ;TODO: add support for OAUTH login
+    :basic-auth gf))
+
+(defn connect [uri credentials timeout max-retries backoff-ms auth-method]
+  (-> (->Grafana uri credentials timeout max-retries backoff-ms auth-method)
+      log-in))
+
+(defmethod ig/init-key :magnet.dashboard-manager/grafana [_ {:keys [uri credentials timeout max-retries backoff-ms auth-method]
+                                                             :or   {timeout     default-timeout
+                                                                    auth-method default-auth-method
+                                                                    max-retries default-max-retries
+                                                                    backoff-ms  default-backoff-ms}}]
+  (connect uri credentials timeout max-retries backoff-ms auth-method))

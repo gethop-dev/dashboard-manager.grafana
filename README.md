@@ -44,13 +44,14 @@ To use this library add the following key to your configuration:
 
 `:magnet.dashboard-manager/grafana`
 
-This key expects a configuration map with two mandatory keys, plus another three optional ones.
+This key expects a configuration map with two mandatory keys
 These are the mandatory keys:
 
 * `:uri` : The URI where Grafana's server is listening.
 * `:credentials`: A vector with two elements, a username and password, that are used for basic HTTP authentication.
 
 These are the optional keys:
+* `:auth-method`: `:basic-auth` or `:regular-login`; defaults to `:basic-auth`
 * `:timeout`: Timeout value (in milli-seconds) for an connection attempt with Grafana.
 * `:max-retries`: If the connection attempt fails, how many retries we want to attempt before giving up.
 * `:backoff-ms`: This is a vector in the form [initial-delay-ms max-delay-ms multiplier] to control the delay between each retry. The delay for nth retry will be (max (* initial-delay-ms n multiplier) max-delay-ms). If multiplier is not specified (or if it is nil), a multiplier of 2 is used. All times are in milli-seconds.
@@ -79,6 +80,7 @@ Configuration with custom request retry policy:
 
 ### Obtaining a `Grafana` record
 
+#### Using Duct
 If you are using the library as part of a [Duct](https://github.com/duct-framework/duct)-based project, adding any of the previous configurations to your `config.edn` file will perform all the steps necessary to initialize the key and return a `Grafana` record for the associated configuration. In order to show a few interactive usages of the library, we will do all the steps manually in the REPL.
 
 First we require the relevant namespaces:
@@ -124,6 +126,19 @@ user> gf-record
                                           :backoff-ms [500 1000 2.0]}
 user>
 ```
+#### Not using Duct
+
+```clj
+user> (require '[magnet.dashboard-manager.grafana :as grafana])
+      (grafana/connect "http://localhost:4000", ["admin" "adamin"])
+#magnet.dashboard_manager.grafana.Grafana{:uri "http://localhost:4000",
+                                          :credentials ["admin"
+                                                        "admin"],
+                                          :timeout 200,
+                                          :max-retries 10,
+                                          :backoff-ms [500 1000 2.0]}
+```
+
 Now that we have our `Grafana` record, we are ready to use the methods defined by the protocols defined in `magnet.dashboard-manager.core` namespace.
 
 ### Managing organizations
@@ -268,6 +283,18 @@ user> (core/get-user gf-record "login")
 * parameters:
   - A `Grafana` record
   - User ID
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`, `not-found`
+  - `:orgs`: A vector of maps. Each map representing an organization.
+* Example:
+```clj
+user> (core/get-user-orgs gf-record 1)
+{:status :ok :orgs [{:orgId 1, :name "Main Org.", :role "Admin"}]}
+```
+#### `get-current-user-orgs`
+* description: Gets a list of organizations to which currently logged in user belongs.
+* parameters:
+  - A `Grafana` record
 * returning value:
   - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`, `not-found`
   - `:orgs`: A vector of maps. Each map representing an organization.
@@ -440,6 +467,12 @@ user> (core/update-datasource gf-record 1 2 {:name "new-name"})
 user> (core/delete-datasource gf-record 1 2)
 {:status :ok}
 ```
+
+## Running Tests Locally
+```bash
+./run-tests.sh
+```
+
 ## License
 
 Copyright (c) 2019, 2020 Magnet S Coop.
