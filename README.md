@@ -99,9 +99,8 @@ user>
 Next we create the configuration var holding the Grafana integration configuration details:
 
 ```clj
-user> (def config {:uri #duct/env ["GRAFANA_URI" Str :or "http://localhost:3000"]
-                   :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"]
-                                 #duct/env ["GRAFANA_PASSWORD" Str :or "admin"]]})
+user> (def config {:uri "http://localhost:3000"
+                   :credentials ["admin" "admin"]})
 #'user/config
 user>
 ```
