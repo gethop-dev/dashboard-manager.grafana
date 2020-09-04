@@ -1,3 +1,4 @@
+language: clojure
 lein: 2.8.3
 dist: xenial
 services:
@@ -19,6 +20,7 @@ jobs:
       before_install:
         - ./start-grafana.sh
     - stage: "deploy"
+      script: skip
       deploy:
         provider: script
         skip_cleanup: true
