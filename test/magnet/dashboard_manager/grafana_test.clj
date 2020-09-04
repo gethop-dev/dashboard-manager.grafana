@@ -85,17 +85,16 @@
 (deftest ^:integration update-or-create-dashboard-test
   (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
         dashboard
-        (:dashboard (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid))]
+        (:dashboard (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid))
+        new-dashboard (-> dashboard
+                          (dissoc :id :uid)
+                          (assoc :title (str gensym)))]
     (testing "Create dashboard"
-      (let [new-dashboard (-> dashboard
-                              (dissoc :id :uid)
-                              (assoc :title (str (gensym))))
-            result (dm-core/update-or-create-dashboard gf-boundary default-org-id new-dashboard)]
+      (let [result (dm-core/update-or-create-dashboard gf-boundary default-org-id new-dashboard)]
         (is (= :ok (:status result)))
         (is (= 1 (:version result)))))
     (testing "Update dashboard"
-      (let [updated-dashboard (-> dashboard
-                                  (dissoc :id :uid)
+      (let [updated-dashboard (-> new-dashboard
                                   (assoc :editable false))
             result (dm-core/update-or-create-dashboard
                     gf-boundary default-org-id updated-dashboard {:overwrite true})]
