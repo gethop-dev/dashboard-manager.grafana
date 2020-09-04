@@ -307,7 +307,7 @@ user> (core/get-user-orgs gf-record 1)
 user> (core/get-user-orgs gf-record 1)
 {:status :ok :orgs [{:orgId 1, :name "Main Org.", :role "Admin"}]}
 ```
-### `delete-user`
+#### `delete-user`
 * parameters:
   - A `Grafana` record
   - User's ID
@@ -320,7 +320,7 @@ user> (core/delete-user gf-record 2)
 ```
 
 ### Managing dashboards
-### `get-dashboard`
+#### `get-dashboard`
 * description: Get the dashboard definition
 * parameters:
   - A `Grafana` record
