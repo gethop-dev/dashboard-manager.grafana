@@ -7,19 +7,25 @@ jdk:
   - openjdk8
 jobs:
   include:
-    - name: "Legacy Grafana"
+    - stage: "test"
+      name: "Legacy Grafana"
       env: GRAFANA_TEST_VERSION=${GRAFANA_TEST_VERSION_LEGACY}
-    - name: "Latest Grafana"
+      script: lein lint-and-test
+      before_install:
+        - ./start-grafana.sh
+    - stage: "test"
+      name: "Latest Grafana"
       env: GRAFANA_TEST_VERSION=${GRAFANA_TEST_VERSION_LATEST}
-before_install:
-  - ./start-grafana.sh
-script: lein lint-and-test
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: lein deploy
-  on:
-    tags: true
+      script: lein lint-and-test
+      before_install:
+        - ./start-grafana.sh
+    - stage: "deploy"
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: lein deploy
+        on:
+          tags: true
 cache:
   directories:
     - $HOME/.m2
