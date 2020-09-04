@@ -147,6 +147,39 @@
     {:status (default-status-codes status)
      :orgs body}))
 
+(defn gf-get-current-org-ds [gf-record ds-uid]
+  (let [{:keys [status body]} (do-request gf-record  {:url (str "/api/dashboards/uid/" ds-uid)})]
+    {:status (default-status-codes status)
+     :meta (:meta body)
+     :dashboard (:dashboard body)}))
+
+(defn gf-update-or-create-current-org-ds [gf-record dashboard opts]
+  (let [{:keys [status body]
+         {:keys [id uid version]} :body}
+        (do-request gf-record  {:method :post
+                                :headers {"Content-Type" "application/json"}
+                                :url "/api/dashboards/db"
+                                :body (json/write-str
+                                       (merge
+                                        opts
+                                        {:dashboard dashboard}))})]
+    {:status (case status
+               412 :already-exists
+               (default-status-codes status))
+     :id id :uid uid :version version}))
+
+(defn gf-delete-current-org-ds [gf-record ds-uid]
+  (let [{:keys [status body]} (do-request gf-record  {:method :delete
+                                                      :url (str "/api/dashboards/uid/" ds-uid)})]
+    {:status (default-status-codes status)}))
+
+(defn gf-get-current-org-dashboards-with-tag [gf-record tag]
+  (let [{:keys [status body]} (do-request gf-record  {:url "/api/search"
+                                                      :query-params {:tag tag
+                                                                     :type "dash-db"}})]
+    {:status (default-status-codes status)
+     :dashboards (map #(select-keys % [:uid :title :url]) body)}))
+
 (defn with-org [gf-record org-id f & args]
   (locking gf-record
     (let [{:keys [status]} (switch-org gf-record org-id)]
@@ -287,12 +320,22 @@
 
 (defrecord Grafana [uri credentials timeout max-retries backoff-ms auth-method]
   core/IDMDashboard
+  (get-dashboard [this org-id ds-uid]
+    (with-org this org-id gf-get-current-org-ds ds-uid))
+  (update-or-create-dashboard [this org-id dashboard]
+    (with-org this org-id gf-update-or-create-current-org-ds dashboard {}))
+  (update-or-create-dashboard [this org-id dashboard opts]
+    (with-org this org-id gf-update-or-create-current-org-ds dashboard opts))
+  (delete-dashboard [this org-id ds-uid]
+    (with-org this org-id gf-delete-current-org-ds ds-uid))
   (get-ds-panels [this org-id ds-uid]
     (with-org this org-id gf-get-current-ds-panels ds-uid))
   (get-org-panels [this org-id]
     (with-org this org-id gf-get-current-org-panels))
   (get-org-dashboards [this org-id]
     (with-org this org-id gf-get-current-dashboards))
+  (get-dashboards-with-tag [this org-id tag]
+    (with-org this org-id gf-get-current-org-dashboards-with-tag tag))
 
   core/IDMOrganization
   (create-org [this org-name]

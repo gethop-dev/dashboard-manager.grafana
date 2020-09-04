@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- New methods for managing dashboards: `get-dashboard`, `update-or-create-dashboard`, `delete-dashboard` and `get-dashboards-with-tag`
 
 ## [0.2.5] - 2020-01-07
 ### Changed

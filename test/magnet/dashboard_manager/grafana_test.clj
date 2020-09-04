@@ -75,7 +75,46 @@
     (testing "`get-org-dashboards` test"
       (let [result (dm-core/get-org-dashboards gf-boundary default-org-id)]
         (is (= {:status :ok, :dashboards provisioned-test-dashboards}
-               result))))))
+               result))))
+    (testing "`get-dashboard` test"
+      (let [result (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid)]
+        (is (= :ok (:status result)))
+        (is (map? (:meta result)))
+        (is (map? (:dashboard result)))))))
+
+(deftest ^:integration update-or-create-dashboard-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        dashboard
+        (:dashboard (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid))]
+    (testing "Create dashboard"
+      (let [new-dashboard (-> dashboard
+                              (dissoc :id :uid)
+                              (assoc :title (str (gensym))))
+            result (dm-core/update-or-create-dashboard gf-boundary default-org-id new-dashboard)]
+        (is (= :ok (:status result)))
+        (is (= 1 (:version result)))))
+    (testing "Update dashboard"
+      (let [updated-dashboard (-> dashboard
+                                  (dissoc :id :uid)
+                                  (assoc :editable false))
+            result (dm-core/update-or-create-dashboard
+                    gf-boundary default-org-id updated-dashboard {:overwrite true})]
+        (is (= :ok (:status result)))
+        (is (= (inc (:version dashboard)) (:version result)))))))
+
+(deftest ^:integration delete-dashboard-test
+  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+        base-dashboard
+        (:dashboard (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid))
+        new-dashboard (-> base-dashboard (dissoc :id :uid) (assoc :title (str (gensym))))
+        new-dashboard-uid
+        (:uid (dm-core/update-or-create-dashboard gf-boundary default-org-id new-dashboard))]
+    (testing "Delete dashboard"
+      (let [result (dm-core/delete-dashboard gf-boundary default-org-id new-dashboard-uid)]
+        (is (= :ok (:status result)))))
+    (testing "Delete dashboard that doesn't exist"
+      (let [result (dm-core/delete-dashboard gf-boundary default-org-id new-dashboard-uid)]
+        (is (= :not-found (:status result)))))))
 
 (deftest ^:integration create-org-test
   (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)

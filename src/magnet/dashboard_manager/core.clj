@@ -5,9 +5,15 @@
 (ns magnet.dashboard-manager.core)
 
 (defprotocol IDMDashboard
+  (get-dashboard [this org-id ds-uid])
+  (update-or-create-dashboard
+    [this org-id dashboard]
+    [this org-id dashboard opts])
+  (delete-dashboard [this org-id ds-uid])
   (get-ds-panels [this org-id ds-uid])
   (get-org-panels [this org-id])
-  (get-org-dashboards [this org-id]))
+  (get-org-dashboards [this org-id])
+  (get-dashboards-with-tag [this org-id tags]))
 
 (defprotocol IDMOrganization
   (create-org [this org-name])

@@ -23,9 +23,13 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
     * [get-user-orgs](#get-user-orgs)
     * [delete-user](#delete-user)
   * [Managing dashboards](#managing-dashboards)
+    * [get-dashboard](#get-dashboard)
+    * [update-or-create-dashboard](#update-or-create-dashboard)
+    * [delete-dashboard](#delete-dashboard)
     * [get-org-dashboards](#get-org-dashboards)
     * [get-org-panels](#get-org-panels)
     * [get-ds-panels](#get-ds-panels)
+    * [get-dashboards-with-tag](#get-dashboards-with-tag)
   * [Managing datasources](#managing-datasources)
     * [create-datasource](#create-datasource)
     * [get-datasource](#get-datasource)
@@ -316,6 +320,126 @@ user> (core/delete-user gf-record 2)
 ```
 
 ### Managing dashboards
+### `get-dashboard`
+* description: Get the dashboard definition
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - Dashboard UID
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
+  - `:meta`: A map with the dashboard metadata
+  - `:dashboard`: A map with the dashboard definition
+* Example:
+```clj
+user> (core/get-dashboard gf-record 1 "eD_Es2vMk")
+{:status :ok,
+ :meta
+ {:provisionedExternalId "",
+  :slug "bat",
+  :canStar true,
+  :createdBy "admin",
+  :updated "2020-09-04T07:37:43Z",
+  :provisioned false,
+  :type "db",
+  :created "2020-09-04T07:14:17Z",
+  :folderUrl "/dashboards/f/kXFTY2vGk/default",
+  :canSave true,
+  :expires "0001-01-01T00:00:00Z",
+  :updatedBy "admin",
+  :canEdit true,
+  :url "/d/eD_Es2vMk/bat",
+  :folderId 1,
+  :folderTitle "default",
+  :version 4,
+  :canAdmin true,
+  :isFolder false,
+  :hasAcl false},
+ :dashboard
+ {:templating {:list []},
+  :timepicker
+  {:refresh_intervals
+   ["5s" "10s" "30s" "1m" "5m" "15m" "30m" "1h" "2h" "1d"]},
+  :tags ["default"],
+  :timezone "",
+  :editable false,
+  :graphTooltip 0,
+  :uid "eD_Es2vMk",
+  :time {:from "now-6h", :to "now"},
+  :gnetId nil,
+  :variables {:list []},
+  :title "bat",
+  :style "dark",
+  :id 6,
+  :annotations
+  {:list
+   [{:$$hashKey "object:85",
+     :builtIn 1,
+     :datasource "-- Grafana --",
+     :enable true,
+     :hide true,
+     :iconColor "rgba(0, 211, 255, 1)",
+     :name "Annotations & Alerts",
+     :type "dashboard"}]},
+  :version 4,
+  :panels
+  [{:datasource nil,
+    :gridPos {:h 9, :w 12, :x 0, :y 0},
+    :pluginVersion "6.7.3",
+    :timeShift nil,
+    :type "gauge",
+    :title "bat",
+    :id 2,
+    :timeFrom nil,
+    :options
+    {:fieldOptions
+     {:calcs ["mean"],
+      :defaults
+      {:mappings [],
+       :thresholds
+       {:mode "absolute",
+        :steps
+        [{:color "green", :value nil} {:color "red", :value 80}]}},
+      :overrides [],
+      :values false},
+     :orientation "auto",
+     :showThresholdLabels false,
+     :showThresholdMarkers true}}],
+  :links [],
+  :schemaVersion 22}}
+```
+#### `update-or-create-dashboard`
+* description: Update or create a dashboard
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - A dashboard definition (For example the one returned by `get-dashboard`)
+  - Optional map with additional parameters: 'folderId`, `overwrite`, `message` and `refresh`. See Grafana's [documentation](https://grafana.com/docs/grafana/latest/http_api/dashboard/#create--update-dashboard) for more details.
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
+  - `:id`: dashboard id
+  - `:uid`: dashboard uid
+  - `:version`: dashboard version
+* Example:
+```clj
+user> (def dashboard (-> (core/get-dashboard gf-record 1 "eD_Es2vMk") :dashboard (dissoc :id :uid)))
+#'magnet.dashboard.grafana/dashboard
+user> (core/update-or-create-dashboard gf-record 2 dashboard {:overwrite false})
+{:status :ok :id 4 :uid "UQ48PhDGk" :version 1}
+```
+#### `delete-dashboard`
+* description: Delete a dashboard
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - Dashboard UID
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
+* Example:
+```clj
+user> (core/delete-dashboard gf-record 1 "eD_Es2vMk")
+{:status :ok}
+```
 #### `get-org-dashboards`
 * description: Gets a list of dashboards for the given organization.
 * parameters:
@@ -358,6 +482,21 @@ ample-dashboard", :ds-id "yYtEB6WZz"})}
 user> (core/get-org-panels gf-record 1)
 {:status :ok, :panels ({:id 2, :title "Panel Title", :ds-url "/d/yYtEB6WZz/example-dashboard", :ds-id "yYtEB6WZz"} {:id 4, :title "Panel Title", :ds-url "/d/yYtEB6WZz/ex\
 ample-dashboard", :ds-id "yYtEB6WZz"})}
+```
+#### `get-dashboards-with-tag`
+* description: Get the list of dashboards with a given tag
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - Dashboard tag to search for
+* returning value:
+  - `:status`: `:ok`, `:access-denied`, `:not-found`, `:unknown-host`, `:connection-refused`, `:error`
+  - `:dashboards`: A list of maps. Each map representing a dashboard with the title, uid, and url keys.
+* Example:
+```clj
+user>(core/get-dashboards-with-tag gf-record 1 "test")
+{:status :ok
+ :dashboards (core/get-dashboards-with-tag gf-record 1 "default")}
 ```
 ### Managing datasources
 #### `create-datasource`
