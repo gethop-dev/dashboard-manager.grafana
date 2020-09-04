@@ -1,4 +1,4 @@
-(defproject magnet/dashboard-manager.grafana "0.2.6-SNAPSHOT"
+(defproject magnet/dashboard-manager.grafana "0.2.6"
   :description "A Duct library for managing dashboards and associated users and organizations in Grafana"
   :url "https://github.com/magnetcoop/dashboard-manager.grafana"
   :min-lein-version "2.9.0"
