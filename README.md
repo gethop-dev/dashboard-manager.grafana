@@ -512,9 +512,9 @@ user> (core/create-datasource gf-record 1 {:name "Name"
                                            :type "postgres"
                                            :url "postgres:5432"
                                            :access "proxy"
-                                           :password "pass"
-                                           :user "postgres"
                                            :database "hydrogen"
+                                           :user "postgres"
+                                           :secureJsonData {:password "pass"}
                                            :isDefault true
                                            :jsonData {:postgresVersion 906 :sslmode "disable"}})
 {:status :ok :id 2}
