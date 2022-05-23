@@ -1,11 +1,11 @@
-(ns magnet.dashboard-manager.grafana-test
+(ns dev.gethop.dashboard-manager.grafana-test
   (:require
    [clojure.test :refer :all]
    [integrant.core :as ig]
-   [magnet.dashboard-manager.grafana :as dm-grafana]
-   [magnet.dashboard-manager.core :as dm-core]
+   [dev.gethop.dashboard-manager.grafana :as dm-grafana]
+   [dev.gethop.dashboard-manager.core :as dm-core]
    [clojure.string :as str])
-  (:import [magnet.dashboard_manager.grafana Grafana]
+  (:import [dev.gethop.dashboard_manager.grafana Grafana]
            [java.util UUID]))
 
 (def ^:const test-config
@@ -60,10 +60,10 @@
 
 (deftest protocol-test
   (is (instance? Grafana
-                 (ig/init-key :magnet.dashboard-manager/grafana test-config))))
+                 (ig/init-key :dev.gethop.dashboard-manager/grafana test-config))))
 
 (deftest ^:integration IDMDashboard
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`get-ds-panels` test"
       (let [result (dm-core/get-ds-panels gf-boundary default-org-id provisioned-dashboard-uid)]
         (is (= {:status :ok, :panels provisioned-test-panels}
@@ -83,7 +83,7 @@
         (is (map? (:dashboard result)))))))
 
 (deftest ^:integration update-or-create-dashboard-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         dashboard
         (:dashboard (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid))
         new-dashboard (-> dashboard
@@ -102,7 +102,7 @@
         (is (= (inc (:version dashboard)) (:version result)))))))
 
 (deftest ^:integration delete-dashboard-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         base-dashboard
         (:dashboard (dm-core/get-dashboard gf-boundary default-org-id provisioned-dashboard-uid))
         new-dashboard (-> base-dashboard (dissoc :id :uid) (assoc :title (str (gensym))))
@@ -116,7 +116,7 @@
         (is (= :not-found (:status result)))))))
 
 (deftest ^:integration create-org-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         org-name (str (UUID/randomUUID))]
     (testing "`create-org` test"
       (let [result (dm-core/create-org gf-boundary org-name)]
@@ -128,7 +128,7 @@
         (is (= :already-exists (:status result)))))))
 
 (deftest ^:integration get-orgs-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         org-name (str (UUID/randomUUID))]
     (testing "`get-orgs` test"
       (dm-core/create-org gf-boundary org-name)
@@ -139,7 +139,7 @@
         (is (contains-org? orgs org-name))))))
 
 (deftest ^:integration update-org-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         org-name (str (UUID/randomUUID))]
     (testing "`update-org` test"
       (let [org (dm-core/create-org gf-boundary (str (UUID/randomUUID))) ;; FIXME: passing plain UUID object will throw an exception.
@@ -153,7 +153,7 @@
         (is (= :error (:status result)))))))
 
 (deftest ^:integration delete-org-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         org-name (str (UUID/randomUUID))]
     (testing "`delete-org` test"
       (let [org-id (:id (dm-core/create-org gf-boundary (str (UUID/randomUUID))))
@@ -164,7 +164,7 @@
         (is (= :not-found (:status result)))))))
 
 (deftest ^:integration create-user-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         user-data (random-user-data)]
     (testing "`create-user` test"
       (let [result (dm-core/create-user gf-boundary user-data)]
@@ -175,7 +175,7 @@
         (is (= :error (:status result)))))))
 
 (deftest ^:integration update-user-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`update-user` test"
       (let [login-name (str (UUID/randomUUID))
             user-data (assoc (random-user-data) :login login-name)
@@ -197,7 +197,7 @@
     ))
 
 (deftest ^:integration get-user-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`get-user` test"
       (let [user-data (random-user-data)
             _ (dm-core/create-user gf-boundary user-data)
@@ -209,7 +209,7 @@
         (is (= :not-found (:status result)))))))
 
 (deftest ^:integration get-user-orgs-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`get-user-orgs` test"
       (let [user-id (:id (dm-core/create-user gf-boundary (random-user-data)))
             result (dm-core/get-user-orgs gf-boundary user-id)]
@@ -221,7 +221,7 @@
         (is (= :not-found (:status result)))))))
 
 (deftest ^:integration delete-user
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`delete-user` test"
       (let [user-data (random-user-data)
             user-id (:id (dm-core/create-user gf-boundary user-data))
@@ -230,7 +230,7 @@
         (is (= :not-found (:status (dm-core/get-user gf-boundary (:login user-data)))))))))
 
 (deftest ^:integration add-org-user-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`add-org-user` test"
       (let [org-name (str (UUID/randomUUID))
             org-id (:id (dm-core/create-org gf-boundary org-name))
@@ -257,7 +257,7 @@
         (is (= :user-not-found (:status result)))))))
 
 (deftest ^:integration get-org-users
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`get-org-users` test"
       (let [org-id (:id (dm-core/create-org gf-boundary (str (UUID/randomUUID))))
             user-data (random-user-data)
@@ -272,7 +272,7 @@
         (is (= :not-found (:status result)))))))
 
 (deftest ^:integration delete-org-user
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`delete-org-user` test"
       (let [org-id (:id (dm-core/create-org gf-boundary (str (UUID/randomUUID))))
             user-data (random-user-data)
@@ -286,7 +286,7 @@
         (is (= :error (:status result)))))))
 
 (deftest ^:integration create-datasource-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         data (assoc test-datasource :name (str (UUID/randomUUID)))]
     (testing "`create-datasource` test"
       (let [result (dm-core/create-datasource gf-boundary 1 data)]
@@ -298,7 +298,7 @@
         (is (= :already-exists (:status result)))))))
 
 (deftest ^:integration get-datasource-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         name (str (UUID/randomUUID))
         datasource (assoc test-datasource :name name)]
     (testing "`get-datasource` test"
@@ -309,7 +309,7 @@
         (is (every? #(= (second %) ((first %) (:datasource result))) datasource))))))
 
 (deftest ^:integration get-datasources-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         name (str (UUID/randomUUID))
         datasource (assoc test-datasource :name name)]
     (testing "`get-datasources` test"
@@ -321,7 +321,7 @@
         (is (some #(= (:name %) name) datasources))))))
 
 (deftest ^:integration update-datasource-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         datasource (assoc test-datasource :name (str (UUID/randomUUID)))
         datasource2 (assoc datasource :name (str (UUID/randomUUID)))]
     (testing "`update-datasource` test"
@@ -331,7 +331,7 @@
         (is (= (-> result :datasource :name) (:name datasource2)))))))
 
 (deftest ^:integration delete-datasource-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana test-config)
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
         datasource (assoc test-datasource :name (str (UUID/randomUUID)))]
     (testing "`delete-datasource` test"
       (let [id (:id (dm-core/create-datasource gf-boundary 1 datasource))
@@ -344,7 +344,7 @@
         (is (= :error (:status result)))))))
 
 (deftest ^:integration regular-login-test
-  (let [gf-boundary (ig/init-key :magnet.dashboard-manager/grafana (assoc test-config :auth-method :regular-login))]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana (assoc test-config :auth-method :regular-login))]
     (testing "regular login should yield the session cookie"
       (is (str/starts-with? (:session-cookie gf-boundary) dm-grafana/grafana-session-cookie)))
     (testing "logged in user should be able to get orgs that he belongs to"

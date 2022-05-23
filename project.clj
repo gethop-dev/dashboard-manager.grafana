@@ -1,6 +1,6 @@
-(defproject magnet/dashboard-manager.grafana "0.2.7-SNAPSHOT"
+(defproject dev.gethop/dashboard-manager.grafana "0.2.7-SNAPSHOT"
   :description "A Duct library for managing dashboards and associated users and organizations in Grafana"
-  :url "https://github.com/magnetcoop/dashboard-manager.grafana"
+  :url "https://github.com/gethop-dev/dashboard-manager.grafana"
   :min-lein-version "2.9.0"
   :license {:name "Mozilla Public License 2.0"
             :url "https://www.mozilla.org/en-US/MPL/2.0/"}
@@ -23,6 +23,6 @@
              :profiles/dev {}
              :project/dev {:plugins [[jonase/eastwood "0.3.11"]
                                      [lein-cljfmt "0.6.7"]]}
-             :repl {:repl-options {:init-ns magnet.dashboard-manager.grafana
+             :repl {:repl-options {:init-ns dev.gethop.dashboard-manager.grafana
                                    :host "0.0.0.0"
                                    :port 4001}}})

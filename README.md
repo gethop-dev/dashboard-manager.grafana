@@ -46,7 +46,7 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
 ### Configuration
 To use this library add the following key to your configuration:
 
-`:magnet.dashboard-manager/grafana`
+`:dev.gethop.dashboard-manager/grafana`
 
 This key expects a configuration map with two mandatory keys
 These are the mandatory keys:
@@ -65,7 +65,7 @@ Key initialization returns a `Grafana` record that can be used to perform the Gr
 #### Configuration example
 Basic configuration:
 ```edn
-  :magnet.dashboard-manager/grafana
+  :dev.gethop.dashboard-manager/grafana
    {:uri  #duct/env ["GRAFANA_URI" Str :or "http://localhost:3000"]
     :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"]
                   #duct/env ["GRAFANA_TEST_PASSWORD" Str :or "admin"]]}
@@ -73,7 +73,7 @@ Basic configuration:
 
 Configuration with custom request retry policy:
 ```edn
-  :magnet.dashboard-manager/grafana
+  :dev.gethop.dashboard-manager/grafana
    {:uri #duct/env ["GRAFANA_URI" Str :or "http://localhost:3000"]
     :credentials [#duct/env ["GRAFANA_USERNAME" Str :or "admin"]
                   #duct/env ["GRAFANA_TEST_PASSWORD" Str :or "admin"]]
@@ -90,8 +90,8 @@ If you are using the library as part of a [Duct](https://github.com/duct-framewo
 First we require the relevant namespaces:
 
 ```clj
-user> (require '[integrant.core :as ig]
-               '[magnet.dashboard-manager.core :as core])
+user> (require '[dev.gethop.dashboard-manager.core :as core]
+               '[integrant.core :as ig])
 nil
 user>
 ```
@@ -105,10 +105,10 @@ user> (def config {:uri "http://localhost:3000"
 user>
 ```
 
-Now that we have all pieces in place, we can initialize the `:magnet.dashboard-manager/grafana` Integrant key to get a `Grafana` record. As we are doing all this from the REPL, we have to manually require `magnet.dashboard-manager.grafana` namespace, where the `init-key` multimethod for that key is defined (this is not needed when Duct takes care of initializing the key as part of the application start up):
+Now that we have all pieces in place, we can initialize the `:dev.gethop.dashboard-manager/grafana` Integrant key to get a `Grafana` record. As we are doing all this from the REPL, we have to manually require `dev.gethop.dashboard-manager.grafana` namespace, where the `init-key` multimethod for that key is defined (this is not needed when Duct takes care of initializing the key as part of the application start up):
 
 ``` clj
-user> (require '[magnet.dashboard-manager.grafana :as grafana])
+user> (require '[dev.gethop.dashboard-manager.grafana :as grafana])
 nil
 user>
 ```
@@ -118,31 +118,31 @@ And we finally initialize the key with the configuration defined above, to get o
 ``` clj
 user> (def gf-record (->
                        config
-                       (->> (ig/init-key :magnet.dashboard-manager/grafana))))
+                       (->> (ig/init-key :dev.gethop.dashboard-manager/grafana))))
 #'user/gf-record
 user> gf-record
-#magnet.dashboard_manager.grafana.Grafana{:uri "http://localhost:4000",
-                                          :credentials ["admin"
-                                                        "admin"],
-                                          :timeout 200,
-                                          :max-retries 10,
-                                          :backoff-ms [500 1000 2.0]}
+#dev.gethop.dashboard_manager.grafana.Grafana{:uri "http://localhost:4000",
+                                              :credentials ["admin"
+                                                            "admin"],
+                                              :timeout 200,
+                                              :max-retries 10,
+                                              :backoff-ms [500 1000 2.0]}
 user>
 ```
 #### Not using Duct
 
 ```clj
-user> (require '[magnet.dashboard-manager.grafana :as grafana])
+user> (require '[dev.gethop.dashboard-manager.grafana :as grafana])
       (grafana/connect "http://localhost:4000", ["admin" "adamin"])
-#magnet.dashboard_manager.grafana.Grafana{:uri "http://localhost:4000",
-                                          :credentials ["admin"
-                                                        "admin"],
-                                          :timeout 200,
-                                          :max-retries 10,
-                                          :backoff-ms [500 1000 2.0]}
+#dev.gethop.dashboard_manager.grafana.Grafana{:uri "http://localhost:4000",
+                                              :credentials ["admin"
+                                                            "admin"],
+                                              :timeout 200,
+                                              :max-retries 10,
+                                              :backoff-ms [500 1000 2.0]}
 ```
 
-Now that we have our `Grafana` record, we are ready to use the methods defined by the protocols defined in `magnet.dashboard-manager.core` namespace.
+Now that we have our `Grafana` record, we are ready to use the methods defined by the protocols defined in `dev.gethop.dashboard-manager.core` namespace.
 
 ### Managing organizations
 #### `create-org`
@@ -422,7 +422,7 @@ user> (core/get-dashboard gf-record 1 "eD_Es2vMk")
 * Example:
 ```clj
 user> (def dashboard (-> (core/get-dashboard gf-record 1 "eD_Es2vMk") :dashboard (dissoc :id :uid)))
-#'magnet.dashboard.grafana/dashboard
+#'dev.gethop.dashboard.grafana/dashboard
 user> (core/update-or-create-dashboard gf-record 2 dashboard {:overwrite false})
 {:status :ok :id 4 :uid "UQ48PhDGk" :version 1}
 ```

@@ -2,11 +2,11 @@
 ;; License, v. 2.0. If a copy of the MPL was not distributed with this
 ;; file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-(ns magnet.dashboard-manager.grafana
+(ns dev.gethop.dashboard-manager.grafana
   (:require
    [clojure.data.json :as json]
+   [dev.gethop.dashboard-manager.core :as core]
    [diehard.core :as dh]
-   [magnet.dashboard-manager.core :as core]
    [integrant.core :as ig]
    [org.httpkit.client :as http]
    [clojure.string :as str]))
@@ -402,9 +402,9 @@
   (-> (->Grafana uri credentials timeout max-retries backoff-ms auth-method)
       log-in))
 
-(defmethod ig/init-key :magnet.dashboard-manager/grafana [_ {:keys [uri credentials timeout max-retries backoff-ms auth-method]
-                                                             :or   {timeout     default-timeout
-                                                                    auth-method default-auth-method
-                                                                    max-retries default-max-retries
-                                                                    backoff-ms  default-backoff-ms}}]
+(defmethod ig/init-key :dev.gethop.dashboard-manager/grafana [_ {:keys [uri credentials timeout max-retries backoff-ms auth-method]
+                                                                 :or   {timeout     default-timeout
+                                                                        auth-method default-auth-method
+                                                                        max-retries default-max-retries
+                                                                        backoff-ms  default-backoff-ms}}]
   (connect uri credentials timeout max-retries backoff-ms auth-method))
