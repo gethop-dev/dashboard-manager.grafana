@@ -1,1 +1,1 @@
-docker kill $GRAFANA_TEST_CONTAINER_ID
+docker kill ${GRAFANA_TEST_CONTAINER_NAME}

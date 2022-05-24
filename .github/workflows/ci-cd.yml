@@ -18,6 +18,7 @@ jobs:
       GRAFANA_TEST_URI: ${{ secrets.GRAFANA_TEST_URI }}
       GRAFANA_TEST_USERNAME: ${{ secrets.GRAFANA_TEST_USERNAME }}
       GRAFANA_TEST_PASSWORD: ${{ secrets.GRAFANA_TEST_PASSWORD }}
+      GRAFANA_TEST_CONTAINER_NAME: grafana-container
 
     steps:
       - name: Checkout
@@ -54,7 +55,7 @@ jobs:
         run: lein test :all
 
       - name: Kill Grafana container with legacy image
-        run: c=$(docker ps -q) && [[ $c ]] && docker kill $c
+        run: ./stop-grafana.sh
 
       - name: Run Grafana container with latest image
         env:
