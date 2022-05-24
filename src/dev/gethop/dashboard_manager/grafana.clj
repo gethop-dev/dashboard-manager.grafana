@@ -5,11 +5,11 @@
 (ns dev.gethop.dashboard-manager.grafana
   (:require
    [clojure.data.json :as json]
+   [clojure.string :as str]
    [dev.gethop.dashboard-manager.core :as core]
    [diehard.core :as dh]
    [integrant.core :as ig]
-   [org.httpkit.client :as http]
-   [clojure.string :as str]))
+   [org.httpkit.client :as http]))
 
 (def ^:const default-timeout
   "Default timeout value for an connection attempt with grafana."
@@ -54,7 +54,7 @@
   "cookie name returned by Grafana's /login end point"
   "grafana_session")
 
-(defn- fallback [value exception]
+(defn- fallback [_ exception]
   (let [status (condp instance? exception
                  ;; Socket layer related exceptions
                  java.net.UnknownHostException :unknown-host
@@ -95,20 +95,20 @@
               (append-cookie session-cookie))]
     (dh/with-retry {:policy (retry-policy max-retries backoff-ms)
                     :fallback fallback}
-      (let [{:keys [status body error headers] :as resp} @(http/request req)]
+      (let [{:keys [status body error headers]} @(http/request req)]
         (when error
           (throw error))
         (try
           {:status status
            :headers headers
            :body (json/read-str body :key-fn keyword :eof-error? false)}
-          (catch Exception e
+          (catch Exception _
             {:status bad-gateway}))))))
 
 (defn switch-org [gf-record org-id]
-  (let [{:keys [status body]} (do-request gf-record {:url (str "/api/user/using/" org-id)
-                                                     :method :post
-                                                     :headers {"Content-Type" "application/json"}})]
+  (let [{:keys [status]} (do-request gf-record {:url (str "/api/user/using/" org-id)
+                                                :method :post
+                                                :headers {"Content-Type" "application/json"}})]
     {:status (case status
                401 :not-found
                (default-status-codes status))}))
@@ -129,7 +129,7 @@
     {:status (default-status-codes status)
      :panels (->> body
                   (map #(select-keys % [:url :uid]))
-                  (reduce (fn [reduced {:keys [uid url]}]
+                  (reduce (fn [reduced {:keys [uid]}]
                             (let [panels (:panels (gf-get-current-ds-panels gf-record uid))]
                               (concat reduced panels)))
                           []))}))
@@ -154,7 +154,7 @@
      :dashboard (:dashboard body)}))
 
 (defn gf-update-or-create-current-org-ds [gf-record dashboard opts]
-  (let [{:keys [status body]
+  (let [{:keys [status]
          {:keys [id uid version]} :body}
         (do-request gf-record  {:method :post
                                 :headers {"Content-Type" "application/json"}
@@ -169,8 +169,8 @@
      :id id :uid uid :version version}))
 
 (defn gf-delete-current-org-ds [gf-record ds-uid]
-  (let [{:keys [status body]} (do-request gf-record  {:method :delete
-                                                      :url (str "/api/dashboards/uid/" ds-uid)})]
+  (let [{:keys [status]} (do-request gf-record  {:method :delete
+                                                 :url (str "/api/dashboards/uid/" ds-uid)})]
     {:status (default-status-codes status)}))
 
 (defn gf-get-current-org-dashboards-with-tag [gf-record tag]
@@ -204,25 +204,25 @@
      :id (:orgId body)}))
 
 (defn gf-delete-org [gf-record org-id]
-  (let [{:keys [status body]} (do-request gf-record  {:method :delete
-                                                      :url (str "/api/orgs/" org-id)})]
+  (let [{:keys [status]} (do-request gf-record  {:method :delete
+                                                 :url (str "/api/orgs/" org-id)})]
     {:status (default-status-codes status)}))
 
 (defn gf-update-org [gf-record org-id new-org-name]
-  (let [{:keys [status body]} (do-request gf-record  {:method :put
-                                                      :url (str "/api/orgs/" org-id)
-                                                      :headers {"Content-Type" "application/json"}
-                                                      :body (json/write-str {:name new-org-name})})]
+  (let [{:keys [status]} (do-request gf-record  {:method :put
+                                                 :url (str "/api/orgs/" org-id)
+                                                 :headers {"Content-Type" "application/json"}
+                                                 :body (json/write-str {:name new-org-name})})]
     {:status (case status
                400 :already-exists
                (default-status-codes status))}))
 
 (defn gf-add-org-user [gf-record org-id login-name role]
-  (let [{:keys [status body]} (do-request gf-record  {:method :post
-                                                      :url (str "/api/orgs/" org-id "/users")
-                                                      :headers {"Content-Type" "application/json"}
-                                                      :body (json/write-str {:loginOrEmail login-name
-                                                                             :role role})})]
+  (let [{:keys [status]} (do-request gf-record  {:method :post
+                                                 :url (str "/api/orgs/" org-id "/users")
+                                                 :headers {"Content-Type" "application/json"}
+                                                 :body (json/write-str {:loginOrEmail login-name
+                                                                        :role role})})]
     {:status (case status
                400 :role-not-found
                404 :user-not-found
@@ -254,10 +254,10 @@
      :id (:id body)}))
 
 (defn gf-update-user [gf-record id changes]
-  (let [{:keys [status body]} (do-request gf-record  {:method :put
-                                                      :url (str "/api/users/" id)
-                                                      :headers {"Content-Type" "application/json"}
-                                                      :body (json/write-str changes)})]
+  (let [{:keys [status]} (do-request gf-record  {:method :put
+                                                 :url (str "/api/users/" id)
+                                                 :headers {"Content-Type" "application/json"}
+                                                 :body (json/write-str changes)})]
     {:status (case status
                409 :already-exists
                (400 422) :missing-mandatory-data
@@ -279,8 +279,8 @@
      :orgs body}))
 
 (defn gf-delete-user [gf-record user-id]
-  (let [{:keys [status body]} (do-request gf-record  {:method :delete
-                                                      :url (str "/api/admin/users/" user-id)})]
+  (let [{:keys [status]} (do-request gf-record  {:method :delete
+                                                 :url (str "/api/admin/users/" user-id)})]
     {:status (default-status-codes status)}))
 
 (defn gf-create-datasource [gf-record data]
@@ -294,8 +294,8 @@
      :id (:id body)}))
 
 (defn gf-delete-datasource [gf-record id]
-  (let [{:keys [status body]} (do-request gf-record {:method :delete
-                                                     :url (str "/api/datasources/" id)})]
+  (let [{:keys [status]} (do-request gf-record {:method :delete
+                                                :url (str "/api/datasources/" id)})]
     {:status (default-status-codes status)}))
 
 (defn gf-update-datasource [gf-record id changes]

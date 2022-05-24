@@ -1,10 +1,10 @@
 (ns dev.gethop.dashboard-manager.grafana-test
   (:require
+   [clojure.string :as str]
    [clojure.test :refer :all]
-   [integrant.core :as ig]
-   [dev.gethop.dashboard-manager.grafana :as dm-grafana]
    [dev.gethop.dashboard-manager.core :as dm-core]
-   [clojure.string :as str])
+   [dev.gethop.dashboard-manager.grafana :as dm-grafana]
+   [integrant.core :as ig])
   (:import [dev.gethop.dashboard_manager.grafana Grafana]
            [java.util UUID]))
 
@@ -139,8 +139,7 @@
         (is (contains-org? orgs org-name))))))
 
 (deftest ^:integration update-org-test
-  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
-        org-name (str (UUID/randomUUID))]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`update-org` test"
       (let [org (dm-core/create-org gf-boundary (str (UUID/randomUUID))) ;; FIXME: passing plain UUID object will throw an exception.
             new-name (str (UUID/randomUUID))
@@ -153,8 +152,7 @@
         (is (= :error (:status result)))))))
 
 (deftest ^:integration delete-org-test
-  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
-        org-name (str (UUID/randomUUID))]
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`delete-org` test"
       (let [org-id (:id (dm-core/create-org gf-boundary (str (UUID/randomUUID))))
             result (dm-core/delete-org gf-boundary org-id)]
@@ -244,12 +242,10 @@
       (let [org-name (str (UUID/randomUUID))
             org-id (:id (dm-core/create-org gf-boundary org-name))
             user-data (random-user-data)
-            user-id (:id (dm-core/create-user gf-boundary user-data))
             result (dm-core/add-org-user gf-boundary org-id (:login user-data) "NonExistingRole")]
         (is (= :role-not-found (:status result)))))
     (testing "Add an non existing organization to a user"
       (let [user-data (random-user-data)
-            user-id (:id (dm-core/create-user gf-boundary user-data))
             result (dm-core/add-org-user gf-boundary 9999 (:login user-data) "Viewer")]
         (is (= :error (:status result)))))
     (testing "Add a organization to a non existing user"
