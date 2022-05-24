@@ -18,8 +18,6 @@ jobs:
       GRAFANA_TEST_URI: ${{ secrets.GRAFANA_TEST_URI }}
       GRAFANA_TEST_USERNAME: ${{ secrets.GRAFANA_TEST_USERNAME }}
       GRAFANA_TEST_PASSWORD: ${{ secrets.GRAFANA_TEST_PASSWORD }}
-      GRAFANA_TEST_VERSION_LEGACY: ${{ secrets.GRAFANA_TEST_VERSION_LEGACY }}
-      GRAFANA_TEST_VERSION_LATEST: ${{ secrets.GRAFANA_TEST_VERSION_LATEST }}
 
     steps:
       - name: Checkout
@@ -49,7 +47,7 @@ jobs:
 
       - name: Run Grafana container with legacy image
         env:
-          GRAFANA_TEST_VERSION: $GRAFANA_TEST_VERSION_LEGACY
+          GRAFANA_TEST_VERSION: ${{ secrets.GRAFANA_TEST_VERSION_LEGACY }}
         run: ./start-grafana.sh
 
       - name: Test against legacy image
@@ -60,7 +58,7 @@ jobs:
 
       - name: Run Grafana container with latest image
         env:
-          GRAFANA_TEST_VERSION: $GRAFANA_TEST_VERSION_LATEST
+          GRAFANA_TEST_VERSION: ${{ secrets.GRAFANA_TEST_VERSION_LATEST }}
         run: ./start-grafana.sh
 
       - name: Test against latest image
