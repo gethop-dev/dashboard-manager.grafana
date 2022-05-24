@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/magnetcoop/dashboard-manager.grafana.svg?branch=master)](https://travis-ci.org/magnetcoop/dashboard-manager.grafana)
+[![ci-cd](https://github.com/gethop-dev/dashboard-manager.grafana/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/gethop-dev/dashboard-manager.grafana/actions/workflows/ci-cd.yml)
 
 # dashboard-manager.grafana
 
