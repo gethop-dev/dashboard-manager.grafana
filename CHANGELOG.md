@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.2.7] - 2022-05-24
+### Changed
+- Moving the repository to [gethop-dev](https://github.com/gethop-dev) organization
+- CI/CD solution switch from [TravisCI](https://travis-ci.org/) to [GitHub Actions](Ihttps://github.com/features/actions)
+- `lein`, `cljfmt` and `eastwood` dependencies bump
+- This Changelog file update
+
+### Added
+- Source code linting using [clj-kondo](https://github.com/clj-kondo/clj-kondo)
+
+### Fixed
+- Several `eastwood` and `clj-kondo` warnings
+
 ## [0.2.6] - 2020-09-04
 ### Added
 - New methods for managing dashboards: `get-dashboard`, `update-or-create-dashboard`, `delete-dashboard` and `get-dashboards-with-tag`
@@ -51,7 +64,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fix [#6 Get-org-users returns status :ok even if the org doesn't exist](https://github.com/gethop-dev/dashboard-manager.grafana/issues/6)
 - Remove logger.
 
-[UNRELEASED]:  https://github.com/gethop-dev/dashboard-manager.grafana/compare/0.2.6...HEAD
+[UNRELEASED]:  https://github.com/gethop-dev/dashboard-manager.grafana/compare/0.2.7...HEAD
+[0.2.7]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.7
 [0.2.6]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.6
 [0.2.5]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.5
 [0.2.4]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.4

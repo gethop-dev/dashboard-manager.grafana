@@ -1,4 +1,5 @@
 [![ci-cd](https://github.com/gethop-dev/dashboard-manager.grafana/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/gethop-dev/dashboard-manager.grafana/actions/workflows/ci-cd.yml)
+[![Clojars Project](https://img.shields.io/clojars/v/dev.gethop/dashboard-manager.grafana.svg)](https://clojars.org/dev.gethop/dashboard-manager.grafana)
 
 # dashboard-manager.grafana
 
@@ -39,7 +40,7 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
 
 ## Installation
 
-[![Clojars Project](https://clojars.org/magnet/dashboard-manager.grafana/latest-version.svg)](https://clojars.org/magnet/dashboard-manager.grafana)
+[![Clojars Project](https://clojars.org/dev.gethop/dashboard-manager.grafana/latest-version.svg)](https://clojars.org/dev.gethop/dashboard-manager.grafana)
 
 ## Usage
 
