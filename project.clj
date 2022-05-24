@@ -1,7 +1,7 @@
 (defproject dev.gethop/dashboard-manager.grafana "0.2.7-SNAPSHOT"
   :description "A Duct library for managing dashboards and associated users and organizations in Grafana"
   :url "https://github.com/gethop-dev/dashboard-manager.grafana"
-  :min-lein-version "2.9.0"
+  :min-lein-version "2.9.8"
   :license {:name "Mozilla Public License 2.0"
             :url "https://www.mozilla.org/en-US/MPL/2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
@@ -21,8 +21,9 @@
   :aliases {"lint-and-test" ["do" ["cljfmt" "check"] "eastwood" ["test" ":all"]]}
   :profiles {:dev [:project/dev :profiles/dev]
              :profiles/dev {}
-             :project/dev {:plugins [[jonase/eastwood "0.3.11"]
-                                     [lein-cljfmt "0.6.7"]]}
+             :project/dev {:plugins [[jonase/eastwood "1.2.3"]
+                                     [lein-cljfmt "0.8.0"]]}
              :repl {:repl-options {:init-ns dev.gethop.dashboard-manager.grafana
                                    :host "0.0.0.0"
-                                   :port 4001}}})
+                                   :port 4001}}
+             :eastwood {:linters [:all]}})
