@@ -242,10 +242,12 @@
       (let [org-name (str (UUID/randomUUID))
             org-id (:id (dm-core/create-org gf-boundary org-name))
             user-data (random-user-data)
+            _ (dm-core/create-user gf-boundary user-data)
             result (dm-core/add-org-user gf-boundary org-id (:login user-data) "NonExistingRole")]
         (is (= :role-not-found (:status result)))))
     (testing "Add an non existing organization to a user"
       (let [user-data (random-user-data)
+            _ (dm-core/create-user gf-boundary user-data)
             result (dm-core/add-org-user gf-boundary 9999 (:login user-data) "Viewer")]
         (is (= :error (:status result)))))
     (testing "Add a organization to a non existing user"
