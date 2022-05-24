@@ -1,0 +1,71 @@
+name: ci-cd
+on:
+  push:
+    paths-ignore:
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - ".gitignore"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    env:
+      LEIN_ROOT: "true"
+      CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+      CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+      GRAFANA_TEST_URI: ${{ secrets.GRAFANA_TEST_URI }}
+      GRAFANA_TEST_USERNAME: ${{ secrets.GRAFANA_TEST_USERNAME }}
+      GRAFANA_TEST_PASSWORD: ${{ secrets.GRAFANA_TEST_PASSWORD }}
+      GRAFANA_TEST_VERSION_LEGACY: ${{ secrets.GRAFANA_TEST_VERSION_LEGACY }}
+      GRAFANA_TEST_VERSION_LATEST: ${{ secrets.GRAFANA_TEST_VERSION_LATEST }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Clojure Tools
+        uses: DeLaGuardo/setup-clojure@5.1
+        with:
+          lein: 2.9.8
+
+      - name: Install clj-kondo
+        uses: DeLaGuardo/setup-clj-kondo@master
+        with:
+          version: '2020.04.05'
+
+      - name: Check formatting
+        run: lein cljfmt check
+
+      - name: Lint
+        run: clj-kondo --lint src --lint test && lein eastwood
+
+      - name: Run Grafana container with legacy image
+        env:
+          GRAFANA_TEST_VERSION: $GRAFANA_TEST_VERSION_LEGACY
+        run: ./start-grafana.sh
+
+      - name: Test against legacy image
+        run: lein test :all
+
+      - name: Kill Grafana container with legacy image
+        run: c=$(docker ps -q) && [[ $c ]] && docker kill $c
+
+      - name: Run Grafana container with latest image
+        env:
+          GRAFANA_TEST_VERSION: $GRAFANA_TEST_VERSION_LATEST
+        run: ./start-grafana.sh
+
+      - name: Test against latest image
+        run: lein test :all
+
+      - name: Deploy Jar to Clojars
+        if: contains(github.ref, 'refs/tags/')
+        run: lein deploy
