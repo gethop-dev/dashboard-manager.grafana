@@ -339,7 +339,10 @@
         (is (= :not-found get-deleted))))
     (testing "delete non existing datasource"
       (let [result (dm-core/delete-datasource gf-boundary 1 (rand-int 1000))]
-        (is (= :error (:status result)))))))
+        ;; On release v7.4.0 Grafana changed the status code of this endpoint's response
+        ;; to 404 - not-found. Since we run tests against both legacy and latest Grafana
+        ;; versions, we must adjust the response for both cases.
+        (is (contains? #{:not-found :error} (:status result)))))))
 
 (deftest ^:integration regular-login-test
   (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana (assoc test-config :auth-method :regular-login))]
