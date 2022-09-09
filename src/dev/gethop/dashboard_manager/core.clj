@@ -21,6 +21,7 @@
   (update-org [this org-id new-org-name])
   (delete-org [this org-id])
   (add-org-user [this org-id user-login role])
+  (update-org-user [this org-id user-id user-data])
   (get-org-users [this org-id])
   (delete-org-user [this org-id user-id]))
 

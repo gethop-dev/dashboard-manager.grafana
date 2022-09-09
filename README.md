@@ -15,6 +15,7 @@ A [Duct](https://github.com/duct-framework/duct) library that provides an [Integ
     * [update-org](#update-org)
     * [delete-org](#delete-org)
     * [add-org-user](#add-org-user)
+    * [update-org-user](#update-org-user)
     * [get-org-users](#get-org-users)
     * [delete-org-user](#delete-org-user)
   * [Managing users](#managing-users)
@@ -205,6 +206,20 @@ user> (core/delete-org gf-record 2)
 * Example:
 ```clj
 user> (core/add-org-user gf-record 1 "foo-bar" "Editor")
+{:status :ok}
+```
+#### `update-org-user`
+* description: Updates a user belonging to an organization.
+* parameters:
+  - A `Grafana` record
+  - Organization ID
+  - User ID
+  - User's data to be updated related to its organization
+* returning value:
+  - `:status`: `:ok`,`:access-denied`, `:error`,`:invalid-data`
+* Example:
+```clj
+user> (core/update-org-user gf-record 1 1 {:role "Editor"})
 {:status :ok}
 ```
 #### `get-org-users`

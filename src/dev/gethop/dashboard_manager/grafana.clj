@@ -229,6 +229,15 @@
                409 :already-exists
                (default-status-codes status))}))
 
+(defn gf-update-org-user [gf-record org-id user-id user-data]
+  (let [{:keys [status]} (do-request gf-record  {:method :patch
+                                                 :url (str "/api/orgs/" org-id "/users/" user-id)
+                                                 :headers {"Content-Type" "application/json"}
+                                                 :body (json/write-str user-data)})]
+    {:status (case status
+               400 :invalid-data
+               (default-status-codes status))}))
+
 (defn gf-get-org-users [gf-record org-id]
   (let [{:keys [status body]} (do-request gf-record  {:method :get
                                                       :url (str "/api/orgs/" org-id "/users")})]
@@ -348,6 +357,8 @@
     (gf-delete-org this org-id))
   (add-org-user [this org-id login-name role]
     (gf-add-org-user this org-id login-name role))
+  (update-org-user [this org-id user-id user-data]
+    (gf-update-org-user this org-id user-id user-data))
   (get-org-users [this org-id]
     (gf-get-org-users this org-id))
   (delete-org-user [this org-id user-id]

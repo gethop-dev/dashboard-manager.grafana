@@ -254,6 +254,44 @@
       (let [result (dm-core/add-org-user gf-boundary 9999 (str (UUID/randomUUID)) "Viewer")]
         (is (= :user-not-found (:status result)))))))
 
+(deftest ^:integration update-org-user-test
+  (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)
+        org-name (str (UUID/randomUUID))
+        org-id (:id (dm-core/create-org gf-boundary org-name))
+        user-data (random-user-data)
+        user-id (:id (dm-core/create-user gf-boundary user-data))
+        add-org-user-result (dm-core/add-org-user gf-boundary org-id (:login user-data) "Viewer")]
+    (testing "`update-org-user` test"
+      (let [user-data-updated {:role "Editor"}
+            update-org-user-result (when (= :ok (:status add-org-user-result))
+                                     (dm-core/update-org-user gf-boundary org-id user-id user-data-updated))]
+        (is (= :ok (:status update-org-user-result)))))
+    (testing "`update-org-user` with a non existing role"
+      (let [user-data-updated {:role "NonExistingRole"}
+            update-org-user-result (when (= :ok (:status add-org-user-result))
+                                     (dm-core/update-org-user gf-boundary org-id user-id user-data-updated))]
+        (is (= :invalid-data (:status update-org-user-result)))))
+    (testing "`update-org-user` with a non existing user"
+      (let [user-data-updated {:role "Admin"}
+            non-existing-user-id -1
+            update-org-user-result (when (= :ok (:status add-org-user-result))
+                                     (dm-core/update-org-user
+                                      gf-boundary
+                                      org-id
+                                      non-existing-user-id
+                                      user-data-updated))]
+        (is (= :error (:status update-org-user-result)))))
+    (testing "`update-org-user` with a non existing org"
+      (let [user-data-updated {:role "Admin"}
+            non-existing-org-id 9999
+            update-org-user-result (when (= :ok (:status add-org-user-result))
+                                     (dm-core/update-org-user
+                                      gf-boundary
+                                      non-existing-org-id
+                                      user-id
+                                      user-data-updated))]
+        (is (= :error (:status update-org-user-result)))))))
+
 (deftest ^:integration get-org-users
   (let [gf-boundary (ig/init-key :dev.gethop.dashboard-manager/grafana test-config)]
     (testing "`get-org-users` test"
