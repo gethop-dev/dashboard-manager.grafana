@@ -1,4 +1,4 @@
-(defproject dev.gethop/dashboard-manager.grafana "0.2.8-SNAPSHOT"
+(defproject dev.gethop/dashboard-manager.grafana "0.2.8"
   :description "A Duct library for managing dashboards and associated users and organizations in Grafana"
   :url "https://github.com/gethop-dev/dashboard-manager.grafana"
   :min-lein-version "2.9.8"

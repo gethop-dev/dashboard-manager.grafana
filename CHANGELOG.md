@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
+## [0.2.8] - 2022-09-09
 ### Added
 - New method for Updating a user within an organization: `update-org-user`
 
@@ -66,7 +68,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Fix [#6 Get-org-users returns status :ok even if the org doesn't exist](https://github.com/gethop-dev/dashboard-manager.grafana/issues/6)
 - Remove logger.
 
-[UNRELEASED]:  https://github.com/gethop-dev/dashboard-manager.grafana/compare/0.2.7...HEAD
+[UNRELEASED]:  https://github.com/gethop-dev/dashboard-manager.grafana/compare/0.2.8...HEAD
+[0.2.8]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.8
 [0.2.7]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.7
 [0.2.6]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.6
 [0.2.5]: https://github.com/gethop-dev/dashboard-manager.grafana/releases/tag/0.2.5
